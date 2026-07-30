@@ -614,3 +614,51 @@ button {
   padding: 70px 20px;
   color: var(--ink-soft);
 }
+
+/* ---------- Floating contact bubble ---------- */
+
+.floating-contact {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 40;
+}
+
+.floating-contact__btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 10px 20px -6px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.floating-contact__btn:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.floating-contact__btn--whatsapp {
+  background: #25d366;
+}
+
+.floating-contact__btn--instagram {
+  background: radial-gradient(circle at 30% 110%, #ffdb8b 0%, #ee2a7b 40%, #6228d7 100%);
+}
+
+@media (max-width: 480px) {
+  .floating-contact {
+    right: 12px;
+    bottom: 12px;
+  }
+  .floating-contact__btn {
+    width: 46px;
+    height: 46px;
+  }
+}

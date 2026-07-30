@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { instagramProfileLink } from '@/lib/instagram';
 
 export default function Header() {
   return (
@@ -10,7 +11,7 @@ export default function Header() {
         </Link>
         <nav className="nav-links">
           <Link href="/#collection">Collection</Link>
-          <a href="https://www.instagram.com/agavai.in" target="_blank" rel="noopener noreferrer">
+          <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
         </nav>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Fraunces, Work_Sans } from 'next/font/google';
+import FloatingContact from '@/components/FloatingContact';
 import './globals.css';
 
 const display = Fraunces({
@@ -26,7 +27,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${body.variable}`}>{children}</body>
+      <body className={`${display.variable} ${body.variable}`}>
+        {children}
+        <FloatingContact />
+      </body>
     </html>
   );
 }
