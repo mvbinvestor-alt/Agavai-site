@@ -4,12 +4,15 @@ import { supabaseAdmin, MEDIA_BUCKET } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+type RouteParams = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, { params }: RouteParams) {
+  const { id } = await params;
   const admin = supabaseAdmin();
   const { data: product, error } = await admin
     .from('products')
     .select('*, media:product_media(*)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error) {
@@ -20,37 +23,39 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({ product });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!isAdminAuthed()) {
+export async function PUT(req: NextRequest, { params }: RouteParams) {
+  if (!(await isAdminAuthed())) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
   }
 
+  const { id } = await params;
   const body = await req.json();
-  const { name, category, material, price, description, is_available, media } = body;
+  const { name, sku, category, material, price, quantity, description, is_available, media } = body;
 
   const admin = supabaseAdmin();
   const { error } = await admin
     .from('products')
     .update({
       name,
+      sku: sku || null,
       category,
       material: material || null,
       price: price === '' || price === undefined ? null : price,
+      quantity: quantity === '' || quantity === undefined || quantity === null ? 1 : quantity,
       description: description || null,
       is_available: is_available !== false,
     })
-    .eq('id', params.id);
+    .eq('id', id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // If a fresh media array was supplied, replace existing media rows.
   if (Array.isArray(media)) {
-    await admin.from('product_media').delete().eq('product_id', params.id);
+    await admin.from('product_media').delete().eq('product_id', id);
     if (media.length > 0) {
       const rows = media.map((m: { url: string; type: string }, i: number) => ({
-        product_id: params.id,
+        product_id: id,
         url: m.url,
         type: m.type,
         sort_order: i,
@@ -65,18 +70,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  if (!isAdminAuthed()) {
+export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+  if (!(await isAdminAuthed())) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
   }
 
+  const { id } = await params;
   const admin = supabaseAdmin();
 
-  // Best-effort: remove stored media files too.
   const { data: mediaRows } = await admin
     .from('product_media')
     .select('url')
-    .eq('product_id', params.id);
+    .eq('product_id', id);
 
   if (mediaRows && mediaRows.length > 0) {
     const paths = mediaRows
@@ -91,7 +96,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     }
   }
 
-  const { error } = await admin.from('products').delete().eq('id', params.id);
+  const { error } = await admin.from('products').delete().eq('id', id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

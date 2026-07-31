@@ -3,6 +3,7 @@ import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import AdminLogin from '@/components/AdminLogin';
 import AdminProductList from '@/components/AdminProductList';
+import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
 import type { Product } from '@/lib/types';
 
@@ -22,7 +23,7 @@ async function getAllProducts(): Promise<Product[]> {
 }
 
 export default async function AdminPage() {
-  if (!isAdminAuthed()) {
+  if (!(await isAdminAuthed())) {
     return <AdminLogin />;
   }
 
@@ -43,6 +44,8 @@ export default async function AdminPage() {
           + Add product
         </Link>
       </div>
+
+      <InventoryTools />
 
       <AdminProductList products={products} />
 

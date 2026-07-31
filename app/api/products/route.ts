@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { generateSku } from '@/lib/sku';
 
 export const runtime = 'nodejs';
 
@@ -24,12 +25,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAdminAuthed()) {
+  if (!(await isAdminAuthed())) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
   }
 
   const body = await req.json();
-  const { name, category, material, price, description, is_available, media } = body;
+  const { name, sku, category, material, price, quantity, description, is_available, media } = body;
 
   if (!name || !category) {
     return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
@@ -40,9 +41,11 @@ export async function POST(req: NextRequest) {
     .from('products')
     .insert({
       name,
+      sku: sku || generateSku(),
       category,
       material: material || null,
       price: price === '' || price === undefined ? null : price,
+      quantity: quantity === '' || quantity === undefined || quantity === null ? 1 : quantity,
       description: description || null,
       is_available: is_available !== false,
     })

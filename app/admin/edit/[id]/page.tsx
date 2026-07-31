@@ -7,16 +7,17 @@ import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
-  if (!isAdminAuthed()) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  if (!(await isAdminAuthed())) {
     return <AdminLogin />;
   }
 
+  const { id } = await params;
   const admin = supabaseAdmin();
   const { data, error } = await admin
     .from('products')
     .select('*, media:product_media(*)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !data) notFound();

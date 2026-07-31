@@ -17,9 +17,11 @@ export default function ProductForm({ product }: { product?: Product }) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(product?.name || '');
+  const [sku, setSku] = useState(product?.sku || '');
   const [category, setCategory] = useState(product?.category || '');
   const [material, setMaterial] = useState(product?.material || '');
   const [price, setPrice] = useState(product?.price != null ? String(product.price) : '');
+  const [quantity, setQuantity] = useState(product?.quantity != null ? String(product.quantity) : '1');
   const [description, setDescription] = useState(product?.description || '');
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
   const [aiEnhance, setAiEnhance] = useState(true);
@@ -92,9 +94,11 @@ export default function ProductForm({ product }: { product?: Product }) {
     setSaving(true);
     const payload = {
       name: name.trim(),
+      sku: sku.trim() || null,
       category: category.trim(),
       material: material.trim(),
       price: price === '' ? null : Number(price),
+      quantity: quantity === '' ? 1 : Math.max(0, Number(quantity)),
       description: description.trim(),
       is_available: isAvailable,
       media: media.map((m) => ({ url: m.url, type: m.type })),
@@ -123,6 +127,17 @@ export default function ProductForm({ product }: { product?: Product }) {
       <div className="field">
         <label htmlFor="name">Product name</label>
         <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+
+      <div className="field">
+        <label htmlFor="sku">SKU (leave blank to auto-generate)</label>
+        <input
+          id="sku"
+          type="text"
+          placeholder="e.g. AGV-001"
+          value={sku}
+          onChange={(e) => setSku(e.target.value)}
+        />
       </div>
 
       <div className="field">
@@ -155,6 +170,17 @@ export default function ProductForm({ product }: { product?: Product }) {
           min="0"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="quantity">Quantity in stock</label>
+        <input
+          id="quantity"
+          type="number"
+          min="0"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
         />
       </div>
 

@@ -2,8 +2,8 @@ import { isAdminAuthed } from '@/lib/auth';
 import AdminLogin from '@/components/AdminLogin';
 import ProductForm from '@/components/ProductForm';
 
-export default function NewProductPage() {
-  if (!isAdminAuthed()) {
+export default async function NewProductPage() {
+  if (!(await isAdminAuthed())) {
     return <AdminLogin />;
   }
 

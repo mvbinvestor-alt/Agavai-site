@@ -11,9 +11,11 @@ export interface ProductMedia {
 export interface Product {
   id: string;
   name: string;
+  sku: string | null;
   category: string;
   material: string | null;
   price: number | null;
+  quantity: number;
   description: string | null;
   is_available: boolean;
   created_at: string;

@@ -39,8 +39,10 @@ export default function AdminProductList({ products }: { products: Product[] }) 
           <div className="admin-row__info">
             <strong>{p.name}</strong>
             <span>
+              {p.sku ? `${p.sku} · ` : ''}
               {p.category}
               {p.price != null ? ` · ₹${Number(p.price).toLocaleString('en-IN')}` : ''}
+              {` · Qty: ${p.quantity}`}
               {!p.is_available ? ' · Sold' : ''}
             </span>
           </div>

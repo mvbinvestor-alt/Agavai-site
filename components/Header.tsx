@@ -7,7 +7,7 @@ export default function Header() {
       <div className="wrap site-header__row">
         <Link href="/" className="wordmark">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Agavai — Artistry for the Ages" className="wordmark__logo" />
+          <img src="/logo.png" alt="Agavai — Artistry for the Ages" className="wordmark__logo" />
         </Link>
         <nav className="nav-links">
           <Link href="/#collection">Collection</Link>

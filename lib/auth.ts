@@ -16,8 +16,8 @@ export function adminCookieValue(): string {
   return expectedToken();
 }
 
-export function isAdminAuthed(): boolean {
-  const store = cookies();
+export async function isAdminAuthed(): Promise<boolean> {
+  const store = await cookies();
   const value = store.get(COOKIE_NAME)?.value;
   return !!value && value === expectedToken();
 }

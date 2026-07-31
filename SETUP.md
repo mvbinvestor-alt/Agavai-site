@@ -64,6 +64,14 @@ Everything appears on the live catalog immediately — no redeploy needed.
 - Product detail pages with photo/video gallery + WhatsApp order button
   (uses the fixed number in `NEXT_PUBLIC_WHATSAPP_NUMBER` for every product)
 - `/admin` — simple password gate, add/edit/delete products, upload media
+- **Inventory tracking + Excel import/export** — every product has a SKU and
+  a stock quantity now. In `/admin`, **Export to Excel** downloads your full
+  catalog; edit it in Excel and **Import from Excel** to push changes back —
+  rows matching an existing SKU update that product, rows with a new/blank
+  SKU create new products. Note: run
+  `supabase/migration_2_inventory.sql` in the Supabase SQL Editor if your
+  project was set up before this feature was added (adds the SKU/quantity
+  columns to an existing `products` table).
 - **Two-tier photo enhancement pipeline** on every image upload:
   1. **Always on, free:** auto-orientation, exposure/contrast fix, slight
      sharpen, resize, recompression — runs on every photo automatically,
