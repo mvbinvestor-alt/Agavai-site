@@ -72,6 +72,26 @@ Everything appears on the live catalog immediately — no redeploy needed.
   `supabase/migration_2_inventory.sql` in the Supabase SQL Editor if your
   project was set up before this feature was added (adds the SKU/quantity
   columns to an existing `products` table).
+- **Buy Now (Razorpay payments)** — on top of WhatsApp ordering, product
+  pages can also show a **Buy Now** button that creates a Razorpay hosted
+  payment link (UPI/cards/netbanking/wallets). When a payment succeeds,
+  Razorpay notifies the site via webhook, the order is marked paid, and
+  stock quantity is automatically reduced. `/admin/orders` shows every
+  order and its status. Run `supabase/migration_3_orders.sql` in the
+  Supabase SQL Editor to add the orders table. To activate payments:
+  1. Create a Razorpay account (razorpay.com) — needs KYC (PAN, bank
+     details), approval can take 1-2 days.
+  2. Dashboard → Settings → API Keys → generate → add `RAZORPAY_KEY_ID` and
+     `RAZORPAY_KEY_SECRET` to your host's environment variables.
+  3. Dashboard → Settings → Webhooks → Add New Webhook:
+     - URL: `https://agavai.in/api/webhooks/razorpay`
+     - Active events: `payment_link.paid`, `payment_link.expired`,
+       `payment_link.cancelled`
+     - Copy the webhook secret it gives you → add as
+       `RAZORPAY_WEBHOOK_SECRET`
+  4. Redeploy. Until these 3 variables are set, Buy Now shows a friendly
+     "payments not set up yet" message and WhatsApp ordering keeps working
+     as the fallback.
 - **Two-tier photo enhancement pipeline** on every image upload:
   1. **Always on, free:** auto-orientation, exposure/contrast fix, slight
      sharpen, resize, recompression — runs on every photo automatically,

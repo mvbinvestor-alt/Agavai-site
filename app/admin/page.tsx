@@ -40,9 +40,14 @@ export default async function AdminPage() {
         }}
       >
         <h2 style={{ margin: 0 }}>Products ({products.length})</h2>
-        <Link href="/admin/new" className="btn">
-          + Add product
-        </Link>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Link href="/admin/orders" className="btn btn-outline">
+            Orders
+          </Link>
+          <Link href="/admin/new" className="btn">
+            + Add product
+          </Link>
+        </div>
       </div>
 
       <InventoryTools />

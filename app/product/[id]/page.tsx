@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import BuyNowButton from '@/components/BuyNowButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -50,7 +51,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             )}
 
             {product.is_available ? (
-              <WhatsAppButton productName={product.name} />
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <BuyNowButton productId={product.id} />
+                <WhatsAppButton productName={product.name} />
+              </div>
             ) : (
               <span className="btn btn-outline" style={{ pointerEvents: 'none', opacity: 0.6 }}>
                 Sold
