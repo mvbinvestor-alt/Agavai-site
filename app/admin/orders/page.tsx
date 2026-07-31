@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import AdminLogin from '@/components/AdminLogin';
+import OrderRow from '@/components/OrderRow';
 import type { Order } from '@/lib/types';
 
 export const revalidate = 0;
@@ -16,23 +17,15 @@ async function getOrders(): Promise<Order[]> {
   return data || [];
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  paid: 'var(--sage)',
-  pending: 'var(--brass)',
-  failed: 'var(--clay)',
-  cancelled: 'var(--ink-soft)',
-  expired: 'var(--ink-soft)',
-};
-
 export default async function AdminOrdersPage() {
   if (!(await isAdminAuthed())) {
     return <AdminLogin />;
   }
 
   const orders = await getOrders();
-  const paidTotal = orders
-    .filter((o) => o.status === 'paid')
-    .reduce((sum, o) => sum + (o.price || 0), 0);
+  const paidOrders = orders.filter((o) => o.status === 'paid');
+  const paidTotal = paidOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+  const needsDispatch = paidOrders.filter((o) => !o.is_dispatched).length;
 
   return (
     <div className="admin-shell">
@@ -52,6 +45,14 @@ export default async function AdminOrdersPage() {
 
       <p style={{ fontSize: 14, color: 'var(--ink-soft)' }}>
         Total paid: <strong>₹{paidTotal.toLocaleString('en-IN')}</strong>
+        {needsDispatch > 0 && (
+          <>
+            {' · '}
+            <strong style={{ color: 'var(--clay)' }}>
+              {needsDispatch} order{needsDispatch > 1 ? 's' : ''} awaiting dispatch
+            </strong>
+          </>
+        )}
       </p>
 
       {orders.length === 0 ? (
@@ -59,26 +60,7 @@ export default async function AdminOrdersPage() {
       ) : (
         <div>
           {orders.map((o) => (
-            <div className="admin-row" key={o.id}>
-              <div className="admin-row__info">
-                <strong>{o.product_name}</strong>
-                <span>
-                  {o.price != null ? `₹${Number(o.price).toLocaleString('en-IN')} · ` : ''}
-                  {new Date(o.created_at).toLocaleString('en-IN')}
-                  {o.buyer_phone ? ` · ${o.buyer_phone}` : ''}
-                </span>
-              </div>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: STATUS_COLOR[o.status] || 'var(--ink)',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {o.status}
-              </span>
-            </div>
+            <OrderRow key={o.id} order={o} />
           ))}
         </div>
       )}

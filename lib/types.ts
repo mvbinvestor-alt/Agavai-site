@@ -34,6 +34,8 @@ export interface Order {
   buyer_phone: string | null;
   buyer_email: string | null;
   status: OrderStatus;
+  is_dispatched: boolean;
+  dispatched_at: string | null;
   razorpay_payment_link_id: string | null;
   razorpay_payment_id: string | null;
   created_at: string;

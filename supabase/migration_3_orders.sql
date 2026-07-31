@@ -20,6 +20,9 @@ create table if not exists orders (
 create index if not exists orders_status_idx on orders (status);
 create index if not exists orders_payment_link_idx on orders (razorpay_payment_link_id);
 
+alter table orders add column if not exists is_dispatched boolean not null default false;
+alter table orders add column if not exists dispatched_at timestamptz;
+
 -- Orders contain buyer contact info, so this table is locked down: RLS is
 -- enabled with NO policies, meaning only the service role (used in our
 -- server-side API routes) can read or write it. The public anon/publishable
