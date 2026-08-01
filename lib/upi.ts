@@ -6,6 +6,14 @@ export function isUpiConfigured() {
   return !!process.env.UPI_ID;
 }
 
+export function getUpiId() {
+  return process.env.UPI_ID || '';
+}
+
+export function getUpiPayeeName() {
+  return process.env.UPI_PAYEE_NAME || 'Agavai';
+}
+
 export function buildUpiLink(params: { amount: number; orderId: string; note?: string }) {
   const payeeUpi = process.env.UPI_ID!;
   const payeeName = process.env.UPI_PAYEE_NAME || 'Agavai';

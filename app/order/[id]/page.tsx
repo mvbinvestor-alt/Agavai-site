@@ -2,7 +2,8 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabaseAdmin } from '@/lib/supabase';
-import { buildUpiLink, isUpiConfigured } from '@/lib/upi';
+import { buildUpiLink, isUpiConfigured, getUpiId, getUpiPayeeName } from '@/lib/upi';
+import CopyUpiId from '@/components/CopyUpiId';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import type { Order, OrderItem } from '@/lib/types';
 
@@ -99,7 +100,7 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
                 <a
                   href={buildUpiLink({ amount: order.total, orderId: order.id })}
                   className="btn"
-                  style={{ display: 'inline-block', marginRight: 10 }}
+                  style={{ display: 'inline-block', marginRight: 10, marginBottom: 10 }}
                 >
                   Pay ₹{Number(order.total).toLocaleString('en-IN')} via UPI
                 </a>
@@ -109,11 +110,24 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
                       `Hi Agavai! I've paid for order ${order.id.slice(0, 8)} via UPI — here's my screenshot.`
                     )}`}
                     className="btn btn-outline"
-                    style={{ display: 'inline-block' }}
+                    style={{ display: 'inline-block', marginBottom: 10 }}
                   >
                     Send Screenshot on WhatsApp
                   </a>
                 )}
+
+                <div style={{ marginTop: 8, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 6 }}>
+                  <p style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 8 }}>
+                    Button not opening your UPI app? (This happens sometimes on iPhone.) Pay manually
+                    instead — open GPay/PhonePe yourself and send ₹
+                    {Number(order.total).toLocaleString('en-IN')} to:
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <CopyUpiId upiId={getUpiId()} />
+                    <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{getUpiPayeeName()}</span>
+                  </div>
+                </div>
+
                 <p style={{ color: 'var(--ink-soft)', fontSize: 13, marginTop: 12 }}>
                   We confirm UPI payments manually — sending your screenshot on WhatsApp speeds this up.
                   This page will update to &quot;confirmed&quot; once we do.
