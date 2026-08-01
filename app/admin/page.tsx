@@ -44,6 +44,9 @@ export default async function AdminPage() {
           <Link href="/admin/orders" className="btn btn-outline">
             Orders
           </Link>
+          <Link href="/admin/analytics" className="btn btn-outline">
+            Analytics
+          </Link>
           <Link href="/admin/new" className="btn">
             + Add product
           </Link>

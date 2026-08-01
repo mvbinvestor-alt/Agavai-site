@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import FloatingContact from '@/components/FloatingContact';
+import Analytics from '@/components/Analytics';
 import { CartProvider } from '@/context/CartContext';
 import './globals.css';
 
@@ -30,6 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${display.variable} ${body.variable}`}>
         <CartProvider>
+          <Suspense fallback={null}>
+            <Analytics />
+          </Suspense>
           {children}
           <FloatingContact />
         </CartProvider>
