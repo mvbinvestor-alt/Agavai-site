@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CatalogGrid from '@/components/CatalogGrid';
+import PokkishamStrip from '@/components/PokkishamStrip';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -31,11 +32,11 @@ export default async function HomePage() {
       <section className="hero">
         <div className="wrap">
           <div className="hero__eyebrow">Artistry for the Ages</div>
-          <h1>A lifestyle brand crafted with soul.</h1>
+          <h1>Where age is art.</h1>
           <p>
-            Agavai curates antiques and handcrafted decor pieces with history in them —
-            each one sourced, chosen, and placed on the shelf for a home that isn&apos;t
-            like anyone else&apos;s. Browse the collection and order straight on WhatsApp.
+            In Tamil, <em>Agavai</em> means age — not oldness, but endurance. We curate vintage
+            treasures and handcraft decor built to be lived in, loved, and passed down. Browse
+            the collection and order straight on WhatsApp.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a href="#collection" className="btn">
@@ -46,6 +47,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <PokkishamStrip products={products} />
       <CatalogGrid products={products} />
       <Footer />
     </>

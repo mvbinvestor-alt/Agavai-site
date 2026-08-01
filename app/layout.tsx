@@ -19,9 +19,9 @@ const body = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Agavai — A lifestyle brand crafted with soul',
+  title: 'Agavai — Artistry for the Ages',
   description:
-    'Agavai is a lifestyle & decor brand curating antiques and handcrafted pieces with soul. Browse the collection and order directly on WhatsApp.',
+    'Agavai curates vintage treasures (Agavai Pokkisham) and handcrafted heritage decor, including 150-year-old Chettinad enamelware and Athangudi tile furniture. Founded by four childhood friends. Browse the collection and order on WhatsApp.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

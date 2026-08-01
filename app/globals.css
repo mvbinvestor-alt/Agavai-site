@@ -91,9 +91,15 @@ button {
 }
 
 .wordmark__logo {
-  height: 44px;
+  height: 64px;
   width: auto;
   display: block;
+}
+
+@media (max-width: 480px) {
+  .wordmark__logo {
+    height: 50px;
+  }
 }
 
 .nav-links {
@@ -101,6 +107,13 @@ button {
   gap: 22px;
   font-size: 14px;
   letter-spacing: 0.02em;
+}
+
+@media (max-width: 480px) {
+  .nav-links {
+    gap: 14px;
+    font-size: 12.5px;
+  }
 }
 
 .nav-links a {
@@ -328,16 +341,49 @@ button {
 
 .site-footer {
   border-top: 1px solid var(--line);
-  padding: 34px 0 50px;
+  padding: 40px 0 44px;
   font-size: 13px;
   color: var(--ink-soft);
 }
 
-.site-footer__row {
+.footer-inner {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.footer-logo {
+  height: 40px;
+  width: auto;
+  opacity: 0.92;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-socials a {
+  color: var(--ink-soft);
+  display: flex;
+}
+
+.footer-socials a:hover {
+  color: var(--clay);
+}
+
+.footer-bottom {
+  display: flex;
+  gap: 16px;
   flex-wrap: wrap;
-  gap: 12px;
+  justify-content: center;
+}
+
+.footer-bottom a {
+  text-decoration: none;
+  color: var(--ink-soft);
 }
 
 .site-footer a {
@@ -357,9 +403,6 @@ button {
 @media (max-width: 860px) {
   .product-detail {
     grid-template-columns: 1fr;
-  }
-  .site-footer__row {
-    flex-direction: column;
   }
 }
 
@@ -613,6 +656,108 @@ button {
   text-align: center;
   padding: 70px 20px;
   color: var(--ink-soft);
+}
+
+/* ---------- Pokkisham featured strip ---------- */
+
+.pokkisham-strip {
+  background: var(--ivory-deep);
+  padding: 44px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.pokkisham-strip__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.pokkisham-strip__title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-style: italic;
+  margin: 4px 0 8px;
+}
+
+.pokkisham-strip__desc {
+  max-width: 46ch;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pokkisham-strip__link {
+  white-space: nowrap;
+}
+
+.pokkisham-strip__row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pokkisham-strip__item {
+  flex: 0 0 200px;
+}
+
+@media (max-width: 480px) {
+  .pokkisham-strip__item {
+    flex-basis: 170px;
+  }
+}
+
+/* ---------- About page ---------- */
+
+.about-lede {
+  font-family: var(--font-display), serif;
+  font-size: 21px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+}
+
+.about-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+}
+
+.about-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 44px 0 34px;
+}
+
+.about-collections {
+  display: grid;
+  gap: 24px;
+}
+
+.about-collections h3 {
+  font-family: var(--font-display), serif;
+  font-size: 19px;
+  margin: 0 0 6px;
+}
+
+.about-collections p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.about-press {
+  background: var(--ivory-deep);
+  border-radius: 6px;
+  padding: 24px;
 }
 
 /* ---------- Floating contact bubble ---------- */

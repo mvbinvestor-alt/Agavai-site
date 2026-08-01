@@ -7,9 +7,10 @@ export default function Header() {
       <div className="wrap site-header__row">
         <Link href="/" className="wordmark">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Agavai — Artistry for the Ages" className="wordmark__logo" />
+          <img src="/logo-header.png" alt="Agavai — Artistry for the Ages" className="wordmark__logo" />
         </Link>
         <nav className="nav-links">
+          <Link href="/about">Our Story</Link>
           <Link href="/#collection">Collection</Link>
           <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
             Instagram
