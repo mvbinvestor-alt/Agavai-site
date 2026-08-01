@@ -206,12 +206,12 @@ export default function ProductForm({ product }: { product?: Product }) {
       </div>
 
       <div className="field">
-        <label htmlFor="shipIntl">International shipping (₹) — leave blank if not shippable abroad</label>
+        <label htmlFor="shipIntl">International shipping (₹) — leave blank if cost varies (customer will be asked to get a quote from you)</label>
         <input
           id="shipIntl"
           type="number"
           min="0"
-          placeholder="Not shippable internationally"
+          placeholder="Varies — quote on request"
           value={shipIntl}
           onChange={(e) => setShipIntl(e.target.value)}
         />

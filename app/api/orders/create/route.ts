@@ -83,7 +83,9 @@ export async function POST(req: NextRequest) {
     }
     if (isInternational && product.shipping_price_international == null) {
       return NextResponse.json(
-        { error: `"${product.name}" can't currently be shipped internationally.` },
+        {
+          error: `International shipping for "${product.name}" needs a quote first — please message us on WhatsApp or Instagram before ordering.`,
+        },
         { status: 400 }
       );
     }

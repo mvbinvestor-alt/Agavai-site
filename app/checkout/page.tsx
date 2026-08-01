@@ -127,10 +127,35 @@ export default function CheckoutPage() {
             </p>
 
             {unshippableItems.length > 0 && (
-              <div className="error-text" style={{ marginBottom: 12 }}>
-                {unshippableItems.map((i) => i.name).join(', ')} can&apos;t currently be shipped
-                internationally. Remove {unshippableItems.length > 1 ? 'them' : 'it'} from your cart or
-                message us on WhatsApp to check.
+              <div style={{ margin: '0 0 16px', padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 6 }}>
+                <p style={{ fontSize: 14, marginBottom: 8 }}>
+                  International shipping is available for {unshippableItems.map((i) => i.name).join(', ')} —
+                  the cost just varies by destination, so we'll need to send you a quote before you can pay.
+                </p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {WHATSAPP_NUMBER && (
+                    <a
+                      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                        `Hi Agavai! I'd like a shipping quote for: ${unshippableItems
+                          .map((i) => `${i.name} x${i.quantity}`)
+                          .join(', ')} to ${form.city || 'my location'}, ${country}.`
+                      )}`}
+                      className="btn btn-outline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Get a Quote on WhatsApp
+                    </a>
+                  )}
+                  <a
+                    href={instagramDmLink()}
+                    className="btn btn-outline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Get a Quote on Instagram
+                  </a>
+                </div>
               </div>
             )}
 
@@ -207,7 +232,11 @@ export default function CheckoutPage() {
             {error && <div className="error-text" style={{ marginTop: 12 }}>{error}</div>}
 
             <button className="btn" type="submit" disabled={!canSubmit || loading} style={{ marginTop: 20 }}>
-              {loading ? 'Starting checkout…' : `Pay ₹${total.toLocaleString('en-IN')}`}
+              {loading
+                ? 'Starting checkout…'
+                : unshippableItems.length > 0
+                  ? 'Get a shipping quote above to continue'
+                  : `Pay ₹${total.toLocaleString('en-IN')}`}
             </button>
           </form>
         )}
