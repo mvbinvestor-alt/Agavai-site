@@ -25,6 +25,12 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [description, setDescription] = useState(product?.description || '');
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
   const [restockMessage, setRestockMessage] = useState(product?.restock_message || '');
+  const [shipDomestic, setShipDomestic] = useState(
+    product?.shipping_price_domestic != null ? String(product.shipping_price_domestic) : '0'
+  );
+  const [shipIntl, setShipIntl] = useState(
+    product?.shipping_price_international != null ? String(product.shipping_price_international) : ''
+  );
   const [aiEnhance, setAiEnhance] = useState(true);
   const [media, setMedia] = useState<MediaItem[]>(
     (product?.media || []).map((m: ProductMedia) => ({ url: m.url, type: m.type, tempId: m.id }))
@@ -103,6 +109,8 @@ export default function ProductForm({ product }: { product?: Product }) {
       description: description.trim(),
       is_available: isAvailable,
       restock_message: restockMessage.trim() || null,
+      shipping_price_domestic: shipDomestic === '' ? 0 : Math.max(0, Number(shipDomestic)),
+      shipping_price_international: shipIntl === '' ? null : Math.max(0, Number(shipIntl)),
       media: media.map((m) => ({ url: m.url, type: m.type })),
     };
 
@@ -183,6 +191,29 @@ export default function ProductForm({ product }: { product?: Product }) {
           min="0"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="shipDomestic">Domestic shipping (₹) — within India</label>
+        <input
+          id="shipDomestic"
+          type="number"
+          min="0"
+          value={shipDomestic}
+          onChange={(e) => setShipDomestic(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="shipIntl">International shipping (₹) — leave blank if not shippable abroad</label>
+        <input
+          id="shipIntl"
+          type="number"
+          min="0"
+          placeholder="Not shippable internationally"
+          value={shipIntl}
+          onChange={(e) => setShipIntl(e.target.value)}
         />
       </div>
 

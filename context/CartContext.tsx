@@ -9,6 +9,8 @@ export interface CartItem {
   image: string | null;
   quantity: number;
   maxQuantity: number; // stock cap, so people can't add more than is in inventory
+  shippingDomestic: number;
+  shippingInternational: number | null; // null = not shippable internationally
 }
 
 interface CartContextValue {

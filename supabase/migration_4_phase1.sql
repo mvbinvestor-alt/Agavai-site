@@ -59,3 +59,8 @@ alter table order_items enable row level security;
 -- means "out of stock but may restock" and shows this message instead.
 alter table products add column if not exists restock_message text;
 
+
+-- 6. Fix: product_name was NOT NULL from the old single-item order design.
+-- New orders don't set it directly (items live in order_items now), so this
+-- was silently blocking every order insert. Drop the constraint.
+alter table orders alter column product_name drop not null;

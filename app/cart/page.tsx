@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { instagramDmLink } from '@/lib/instagram';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal } = useCart();
@@ -78,6 +80,19 @@ export default function CartPage() {
               <strong>₹{subtotal.toLocaleString('en-IN')}</strong>
             </div>
             <p style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Shipping calculated at checkout.</p>
+            <p style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+              Questions about shipping before you order? Message us on{' '}
+              {WHATSAPP_NUMBER && (
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+              )}
+              {WHATSAPP_NUMBER && ' or '}
+              <a href={instagramDmLink()} target="_blank" rel="noopener noreferrer">
+                Instagram DM
+              </a>
+              .
+            </p>
 
             <Link href="/checkout" className="btn" style={{ marginTop: 12, display: 'inline-block' }}>
               Proceed to Checkout

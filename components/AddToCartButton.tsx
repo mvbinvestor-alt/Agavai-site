@@ -10,25 +10,35 @@ export default function AddToCartButton({
   price,
   image,
   maxQuantity,
+  shippingDomestic,
+  shippingInternational,
 }: {
   productId: string;
   name: string;
   price: number;
   image: string | null;
   maxQuantity: number;
+  shippingDomestic: number;
+  shippingInternational: number | null;
 }) {
   const { addItem } = useCart();
   const router = useRouter();
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addItem({ product_id: productId, name, price, image, maxQuantity }, 1);
+    addItem(
+      { product_id: productId, name, price, image, maxQuantity, shippingDomestic, shippingInternational },
+      1
+    );
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   }
 
   function handleBuyNow() {
-    addItem({ product_id: productId, name, price, image, maxQuantity }, 1);
+    addItem(
+      { product_id: productId, name, price, image, maxQuantity, shippingDomestic, shippingInternational },
+      1
+    );
     router.push('/checkout');
   }
 

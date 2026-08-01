@@ -19,6 +19,7 @@ interface ShippingInput {
   city: string;
   state: string;
   pincode: string;
+  country: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -62,6 +63,8 @@ export async function POST(req: NextRequest) {
   }
 
   let subtotal = 0;
+  let shippingFee = 0;
+  const isInternational = (shipping.country || 'India').trim().toLowerCase() !== 'india';
   const lineItems: { product_id: string; product_name: string; price: number; quantity: number }[] = [];
 
   for (const line of items) {
@@ -78,7 +81,14 @@ export async function POST(req: NextRequest) {
     if (product.price == null) {
       return NextResponse.json({ error: `"${product.name}" has no price set yet.` }, { status: 400 });
     }
+    if (isInternational && product.shipping_price_international == null) {
+      return NextResponse.json(
+        { error: `"${product.name}" can't currently be shipped internationally.` },
+        { status: 400 }
+      );
+    }
     subtotal += product.price * line.quantity;
+    shippingFee += (isInternational ? product.shipping_price_international : product.shipping_price_domestic || 0) * line.quantity;
     lineItems.push({
       product_id: product.id,
       product_name: product.name,
@@ -87,7 +97,6 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const shippingFee = 0; // keep in sync with SHIPPING_FEE on the checkout page
   const total = subtotal + shippingFee;
 
   const { data: order, error: orderError } = await admin
@@ -104,6 +113,7 @@ export async function POST(req: NextRequest) {
       shipping_city: shipping.city,
       shipping_state: shipping.state,
       shipping_pincode: shipping.pincode,
+      shipping_country: shipping.country || 'India',
       subtotal,
       shipping_fee: shippingFee,
       total,

@@ -19,6 +19,8 @@ export interface Product {
   description: string | null;
   is_available: boolean;
   restock_message: string | null;
+  shipping_price_domestic: number;
+  shipping_price_international: number | null;
   created_at: string;
   media: ProductMedia[];
 }

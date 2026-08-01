@@ -30,8 +30,20 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 
   const { id } = await params;
   const body = await req.json();
-  const { name, sku, category, material, price, quantity, description, is_available, restock_message, media } =
-    body;
+  const {
+    name,
+    sku,
+    category,
+    material,
+    price,
+    quantity,
+    description,
+    is_available,
+    restock_message,
+    shipping_price_domestic,
+    shipping_price_international,
+    media,
+  } = body;
 
   const admin = supabaseAdmin();
   const { error } = await admin
@@ -46,6 +58,12 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       description: description || null,
       is_available: is_available !== false,
       restock_message: restock_message || null,
+      shipping_price_domestic:
+        shipping_price_domestic === '' || shipping_price_domestic == null ? 0 : shipping_price_domestic,
+      shipping_price_international:
+        shipping_price_international === '' || shipping_price_international == null
+          ? null
+          : shipping_price_international,
     })
     .eq('id', id);
 

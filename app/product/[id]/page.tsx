@@ -58,6 +58,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   price={product.price}
                   image={product.media[0]?.url || null}
                   maxQuantity={product.quantity}
+                  shippingDomestic={product.shipping_price_domestic}
+                  shippingInternational={product.shipping_price_international}
                 />
                 <WhatsAppButton productName={product.name} />
               </div>

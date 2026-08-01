@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
-
-const SHIPPING_FEE = 0; // flat free shipping for now — easy to change later
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { instagramDmLink } from '@/lib/instagram';
 
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
+  const [country, setCountry] = useState('India');
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -23,13 +24,28 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const isInternational = country.trim().toLowerCase() !== 'india';
+
   function update(field: string, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  const total = subtotal + SHIPPING_FEE;
+  const unshippableItems = useMemo(
+    () => (isInternational ? items.filter((i) => i.shippingInternational == null) : []),
+    [items, isInternational]
+  );
+
+  const shippingFee = useMemo(() => {
+    if (isInternational) {
+      return items.reduce((sum, i) => sum + (i.shippingInternational || 0) * i.quantity, 0);
+    }
+    return items.reduce((sum, i) => sum + i.shippingDomestic * i.quantity, 0);
+  }, [items, isInternational]);
+
+  const total = subtotal + shippingFee;
   const canSubmit =
     items.length > 0 &&
+    unshippableItems.length === 0 &&
     form.name.trim() &&
     form.phone.trim() &&
     form.line1.trim() &&
@@ -57,6 +73,7 @@ export default function CheckoutPage() {
             city: form.city,
             state: form.state,
             pincode: form.pincode,
+            country,
           },
         }),
       });
@@ -87,6 +104,36 @@ export default function CheckoutPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label htmlFor="country">Shipping to</label>
+              <select id="country" value={country} onChange={(e) => setCountry(e.target.value)}>
+                <option value="India">India</option>
+                <option value="International">International (outside India)</option>
+              </select>
+            </div>
+
+            <p style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: -8, marginBottom: 16 }}>
+              Questions about shipping before you order? Message us on{' '}
+              {WHATSAPP_NUMBER && (
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+              )}
+              {WHATSAPP_NUMBER && ' or '}
+              <a href={instagramDmLink()} target="_blank" rel="noopener noreferrer">
+                Instagram DM
+              </a>
+              .
+            </p>
+
+            {unshippableItems.length > 0 && (
+              <div className="error-text" style={{ marginBottom: 12 }}>
+                {unshippableItems.map((i) => i.name).join(', ')} can&apos;t currently be shipped
+                internationally. Remove {unshippableItems.length > 1 ? 'them' : 'it'} from your cart or
+                message us on WhatsApp to check.
+              </div>
+            )}
+
             <div className="checkout-summary">
               {items.map((i) => (
                 <div key={i.product_id} className="checkout-summary__row">
@@ -96,6 +143,10 @@ export default function CheckoutPage() {
                   <span>₹{(i.price * i.quantity).toLocaleString('en-IN')}</span>
                 </div>
               ))}
+              <div className="checkout-summary__row">
+                <span>Shipping ({isInternational ? 'International' : 'India'})</span>
+                <span>₹{shippingFee.toLocaleString('en-IN')}</span>
+              </div>
               <div className="checkout-summary__row checkout-summary__total">
                 <span>Total</span>
                 <span>₹{total.toLocaleString('en-IN')}</span>
@@ -140,13 +191,13 @@ export default function CheckoutPage() {
                 required
               />
               <input
-                placeholder="State"
+                placeholder="State / Province"
                 value={form.state}
                 onChange={(e) => update('state', e.target.value)}
                 required
               />
               <input
-                placeholder="Pincode"
+                placeholder="Pincode / Postal code"
                 value={form.pincode}
                 onChange={(e) => update('pincode', e.target.value)}
                 required

@@ -30,8 +30,20 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, sku, category, material, price, quantity, description, is_available, restock_message, media } =
-    body;
+  const {
+    name,
+    sku,
+    category,
+    material,
+    price,
+    quantity,
+    description,
+    is_available,
+    restock_message,
+    shipping_price_domestic,
+    shipping_price_international,
+    media,
+  } = body;
 
   if (!name || !category) {
     return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
@@ -50,6 +62,12 @@ export async function POST(req: NextRequest) {
       description: description || null,
       is_available: is_available !== false,
       restock_message: restock_message || null,
+      shipping_price_domestic:
+        shipping_price_domestic === '' || shipping_price_domestic == null ? 0 : shipping_price_domestic,
+      shipping_price_international:
+        shipping_price_international === '' || shipping_price_international == null
+          ? null
+          : shipping_price_international,
     })
     .select()
     .single();
