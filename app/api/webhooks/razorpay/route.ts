@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendOrderEmail } from '@/lib/email';
+import { markOrderPaid } from '@/lib/orderFulfillment';
 
 export const runtime = 'nodejs';
 
@@ -40,39 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (event === 'payment_link.paid') {
-    const { data: order } = await admin.from('orders').select('*').eq('id', orderId).single();
-    if (!order || order.status === 'paid') {
-      return NextResponse.json({ ok: true });
-    }
-
-    await admin
-      .from('orders')
-      .update({
-        status: 'paid',
-        razorpay_payment_id: paymentEntity?.id || null,
-        paid_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    const { data: orderItems } = await admin.from('order_items').select('*').eq('order_id', orderId);
-
-    for (const item of orderItems || []) {
-      if (!item.product_id) continue;
-      const { data: product } = await admin
-        .from('products')
-        .select('quantity')
-        .eq('id', item.product_id)
-        .single();
-
-      if (product) {
-        const newQty = Math.max(0, product.quantity - item.quantity);
-        await admin.from('products').update({ quantity: newQty }).eq('id', item.product_id);
-      }
-    }
-
-    if (order.buyer_email) {
-      sendOrderEmail(order.buyer_email, 'confirmed', { ...order, items: orderItems || [] }).catch(() => {});
-    }
+    await markOrderPaid(orderId, paymentEntity?.id);
   } else if (event === 'payment_link.expired') {
     await admin.from('orders').update({ status: 'expired' }).eq('id', orderId).eq('status', 'pending');
   } else if (event === 'payment_link.cancelled') {

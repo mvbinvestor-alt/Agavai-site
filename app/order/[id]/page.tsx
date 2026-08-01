@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabaseAdmin } from '@/lib/supabase';
+import { buildUpiLink, isUpiConfigured } from '@/lib/upi';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import type { Order, OrderItem } from '@/lib/types';
 
 export const revalidate = 0;
@@ -86,12 +88,43 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
         ) : order.status === 'pending' ? (
           <>
             <h1 className="font-display" style={{ fontSize: 28 }}>
-              Payment pending
+              {isUpiConfigured() ? 'Complete your payment' : 'Payment pending'}
             </h1>
-            <p style={{ color: 'var(--ink-soft)' }}>
-              We haven&apos;t received confirmation of your payment yet. If you completed payment
-              just now, this page may just need a refresh in a minute.
-            </p>
+            {isUpiConfigured() && order.total != null ? (
+              <>
+                <p style={{ color: 'var(--ink-soft)' }}>
+                  Tap below to pay ₹{Number(order.total).toLocaleString('en-IN')} via GPay, PhonePe, or any
+                  UPI app.
+                </p>
+                <a
+                  href={buildUpiLink({ amount: order.total, orderId: order.id })}
+                  className="btn"
+                  style={{ display: 'inline-block', marginRight: 10 }}
+                >
+                  Pay ₹{Number(order.total).toLocaleString('en-IN')} via UPI
+                </a>
+                {WHATSAPP_NUMBER && (
+                  <a
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                      `Hi Agavai! I've paid for order ${order.id.slice(0, 8)} via UPI — here's my screenshot.`
+                    )}`}
+                    className="btn btn-outline"
+                    style={{ display: 'inline-block' }}
+                  >
+                    Send Screenshot on WhatsApp
+                  </a>
+                )}
+                <p style={{ color: 'var(--ink-soft)', fontSize: 13, marginTop: 12 }}>
+                  We confirm UPI payments manually — sending your screenshot on WhatsApp speeds this up.
+                  This page will update to &quot;confirmed&quot; once we do.
+                </p>
+              </>
+            ) : (
+              <p style={{ color: 'var(--ink-soft)' }}>
+                We haven&apos;t received confirmation of your payment yet. If you completed payment
+                just now, this page may just need a refresh in a minute.
+              </p>
+            )}
           </>
         ) : (
           <>

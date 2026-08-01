@@ -17,6 +17,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 const NEXT_STEP: Record<string, { label: string; status: string } | undefined> = {
+  pending: { label: 'Mark Paid', status: 'paid' },
   paid: { label: 'Mark Packed', status: 'packed' },
   packed: { label: 'Mark Shipped', status: 'shipped' },
   shipped: { label: 'Mark Delivered', status: 'delivered' },

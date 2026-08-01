@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createPaymentLink, isRazorpayConfigured } from '@/lib/razorpay';
+import { isUpiConfigured } from '@/lib/upi';
 
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ interface ShippingInput {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isRazorpayConfigured()) {
+  if (!isRazorpayConfigured() && !isUpiConfigured()) {
     return NextResponse.json(
       { error: 'Payments are not set up yet on this site. Please order via WhatsApp instead.' },
       { status: 503 }
@@ -126,19 +127,25 @@ export async function POST(req: NextRequest) {
   const description =
     lineItems.length === 1 ? lineItems[0].product_name : `${lineItems.length} items from Agavai`;
 
-  try {
-    const link = await createPaymentLink({
-      orderId: order.id,
-      amountInRupees: total,
-      description,
-      callbackUrl: `${siteUrl}/order/${order.id}`,
-    });
+  if (isRazorpayConfigured()) {
+    try {
+      const link = await createPaymentLink({
+        orderId: order.id,
+        amountInRupees: total,
+        description,
+        callbackUrl: `${siteUrl}/order/${order.id}`,
+      });
 
-    await admin.from('orders').update({ razorpay_payment_link_id: link.id }).eq('id', order.id);
+      await admin.from('orders').update({ razorpay_payment_link_id: link.id }).eq('id', order.id);
 
-    return NextResponse.json({ url: link.short_url });
-  } catch (err: any) {
-    await admin.from('orders').update({ status: 'failed' }).eq('id', order.id);
-    return NextResponse.json({ error: err.message || 'Payment link creation failed' }, { status: 500 });
+      return NextResponse.json({ url: link.short_url });
+    } catch (err: any) {
+      await admin.from('orders').update({ status: 'failed' }).eq('id', order.id);
+      return NextResponse.json({ error: err.message || 'Payment link creation failed' }, { status: 500 });
+    }
   }
+
+  // UPI fallback — no gateway, no webhook. Send them to the order page, which
+  // shows a "Pay via UPI" button and explains payment is confirmed manually.
+  return NextResponse.json({ url: `/order/${order.id}` });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendOrderEmail } from '@/lib/email';
+import { markOrderPaid } from '@/lib/orderFulfillment';
 
 export const runtime = 'nodejs';
 
@@ -12,6 +13,7 @@ const TIMESTAMP_FIELD: Record<string, string> = {
 };
 
 const ALLOWED_NEXT: Record<string, string[]> = {
+  pending: ['paid', 'cancelled'],
   paid: ['packed', 'cancelled'],
   packed: ['shipped', 'cancelled'],
   shipped: ['delivered', 'returned'],
@@ -38,6 +40,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       { error: `Can't move an order from "${order.status}" to "${status}"` },
       { status: 400 }
     );
+  }
+
+  // "paid" goes through the shared fulfillment path (stock decrement + email)
+  // so manual UPI confirmation behaves identically to the Razorpay webhook.
+  if (status === 'paid') {
+    const result = await markOrderPaid(id, 'manual-upi-confirm');
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error || 'Could not confirm payment' }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
   }
 
   const update: Record<string, any> = { status };
