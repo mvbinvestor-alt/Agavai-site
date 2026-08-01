@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getClientIp, getCountryForIp } from '@/lib/geo';
 
 export const runtime = 'nodejs';
 
@@ -14,10 +15,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    const ip = getClientIp(req.headers);
+    const country = ip ? await getCountryForIp(ip) : null;
+
     const admin = supabaseAdmin();
     await admin.from('page_views').insert({
       path,
       referrer: typeof referrer === 'string' ? referrer.slice(0, 300) : null,
+      country,
     });
 
     return NextResponse.json({ ok: true });

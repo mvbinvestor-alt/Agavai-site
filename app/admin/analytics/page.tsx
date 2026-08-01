@@ -8,6 +8,7 @@ export const revalidate = 0;
 interface Row {
   path: string;
   referrer: string | null;
+  country: string | null;
   created_at: string;
 }
 
@@ -17,7 +18,7 @@ async function getViews(): Promise<Row[]> {
   since.setDate(since.getDate() - 30);
   const { data } = await admin
     .from('page_views')
-    .select('path, referrer, created_at')
+    .select('path, referrer, country, created_at')
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false })
     .limit(10000);
@@ -59,6 +60,13 @@ export default async function AnalyticsPage() {
   const topReferrers = Object.entries(byReferrer)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
+
+  const byCountry: Record<string, number> = {};
+  for (const v of last7d) {
+    const c = v.country || 'Unknown';
+    byCountry[c] = (byCountry[c] || 0) + 1;
+  }
+  const topCountries = Object.entries(byCountry).sort((a, b) => b[1] - a[1]);
 
   const byDay: Record<string, number> = {};
   for (const v of views) byDay[dayKey(v.created_at)] = (byDay[dayKey(v.created_at)] || 0) + 1;
@@ -127,6 +135,20 @@ export default async function AnalyticsPage() {
             topPages.map(([path, count]) => (
               <div key={path} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
                 <span>{path}</span>
+                <strong>{count}</strong>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <h3 style={{ fontSize: 16, marginBottom: 10 }}>Countries (7 days)</h3>
+          {topCountries.length === 0 ? (
+            <p style={{ color: 'var(--ink-soft)', fontSize: 14 }}>No visits yet.</p>
+          ) : (
+            topCountries.map(([country, count]) => (
+              <div key={country} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
+                <span>{country}</span>
                 <strong>{count}</strong>
               </div>
             ))

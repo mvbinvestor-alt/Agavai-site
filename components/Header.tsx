@@ -22,7 +22,7 @@ export default function Header() {
           </a>
         </nav>
         <Link href="/cart" className="cart-link">
-          🛍️{count > 0 && <span className="cart-badge">{count}</span>}
+          Cart{count > 0 && <span className="cart-badge">{count}</span>}
         </Link>
       </div>
     </header>
