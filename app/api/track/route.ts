@@ -10,8 +10,9 @@ export async function POST(req: NextRequest) {
     if (typeof path !== 'string' || !path.startsWith('/') || path.length > 300) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
-    // Never track the admin panel itself — that's you, not a visitor.
-    if (path.startsWith('/admin')) {
+    // Never track the admin panel, or Hostinger's LiteSpeed cache-warming
+    // probes (they hit the site with these query strings, not real visitors).
+    if (path.startsWith('/admin') || path.includes('LSCWP_CTRL')) {
       return NextResponse.json({ ok: true });
     }
 
