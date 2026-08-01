@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
-import BuyNowButton from '@/components/BuyNowButton';
+import AddToCartButton from '@/components/AddToCartButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -50,15 +50,32 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </dl>
             )}
 
-            {product.is_available ? (
+            {product.is_available && product.quantity > 0 && product.price != null ? (
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                <BuyNowButton productId={product.id} />
+                <AddToCartButton
+                  productId={product.id}
+                  name={product.name}
+                  price={product.price}
+                  image={product.media[0]?.url || null}
+                  maxQuantity={product.quantity}
+                />
                 <WhatsAppButton productName={product.name} />
               </div>
-            ) : (
+            ) : !product.is_available ? (
               <span className="btn btn-outline" style={{ pointerEvents: 'none', opacity: 0.6 }}>
                 Sold
               </span>
+            ) : (
+              <div>
+                <span className="btn btn-outline" style={{ pointerEvents: 'none', opacity: 0.6 }}>
+                  Out of Stock
+                </span>
+                {product.restock_message && (
+                  <p style={{ color: 'var(--ink-soft)', fontSize: 14, marginTop: 8 }}>
+                    {product.restock_message}
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>

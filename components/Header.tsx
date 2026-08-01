@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import { instagramProfileLink } from '@/lib/instagram';
+import { useCart } from '@/context/CartContext';
 
 export default function Header() {
+  const { count } = useCart();
+
   return (
     <header className="site-header">
       <div className="wrap site-header__row">
@@ -15,6 +20,9 @@ export default function Header() {
           <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
+          <Link href="/cart" className="cart-link">
+            Cart{count > 0 && <span className="cart-badge">{count}</span>}
+          </Link>
         </nav>
       </div>
     </header>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import FloatingContact from '@/components/FloatingContact';
+import { CartProvider } from '@/context/CartContext';
 import './globals.css';
 
 const display = Fraunces({
@@ -28,8 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${display.variable} ${body.variable}`}>
-        {children}
-        <FloatingContact />
+        <CartProvider>
+          {children}
+          <FloatingContact />
+        </CartProvider>
       </body>
     </html>
   );

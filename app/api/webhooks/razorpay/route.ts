@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendOrderEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 
@@ -53,23 +54,24 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', orderId);
 
-    if (order.product_id) {
+    const { data: orderItems } = await admin.from('order_items').select('*').eq('order_id', orderId);
+
+    for (const item of orderItems || []) {
+      if (!item.product_id) continue;
       const { data: product } = await admin
         .from('products')
         .select('quantity')
-        .eq('id', order.product_id)
+        .eq('id', item.product_id)
         .single();
 
       if (product) {
-        const newQty = Math.max(0, product.quantity - order.quantity);
-        await admin
-          .from('products')
-          .update({
-            quantity: newQty,
-            is_available: newQty > 0,
-          })
-          .eq('id', order.product_id);
+        const newQty = Math.max(0, product.quantity - item.quantity);
+        await admin.from('products').update({ quantity: newQty }).eq('id', item.product_id);
       }
+    }
+
+    if (order.buyer_email) {
+      sendOrderEmail(order.buyer_email, 'confirmed', { ...order, items: orderItems || [] }).catch(() => {});
     }
   } else if (event === 'payment_link.expired') {
     await admin.from('orders').update({ status: 'expired' }).eq('id', orderId).eq('status', 'pending');

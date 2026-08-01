@@ -2,13 +2,16 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabaseAdmin } from '@/lib/supabase';
+import type { Order, OrderItem } from '@/lib/types';
 
 export const revalidate = 0;
 
-async function getOrder(id: string) {
+async function getOrder(id: string): Promise<(Order & { items: OrderItem[] }) | null> {
   const admin = supabaseAdmin();
-  const { data } = await admin.from('orders').select('*').eq('id', id).single();
-  return data;
+  const { data: order } = await admin.from('orders').select('*').eq('id', id).single();
+  if (!order) return null;
+  const { data: items } = await admin.from('order_items').select('*').eq('order_id', id);
+  return { ...order, items: items || [] };
 }
 
 export default async function OrderStatusPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,19 +32,56 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
               WhatsApp with your payment confirmation.
             </p>
           </>
-        ) : order.status === 'paid' ? (
+        ) : order.status === 'paid' || ['packed', 'shipped', 'delivered'].includes(order.status) ? (
           <>
             <h1 className="font-display" style={{ fontSize: 28 }}>
               Thank you! Your order is confirmed 🎉
             </h1>
+            <div style={{ margin: '16px 0' }}>
+              {order.items.map((item) => (
+                <div
+                  key={item.id}
+                  style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}
+                >
+                  <span>
+                    {item.product_name} × {item.quantity}
+                  </span>
+                  <span>₹{Number(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                </div>
+              ))}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontWeight: 700,
+                  borderTop: '1px solid var(--line)',
+                  paddingTop: 8,
+                  marginTop: 4,
+                }}
+              >
+                <span>Total</span>
+                <span>₹{Number(order.total || 0).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            {order.shipping_address_line1 && (
+              <p style={{ color: 'var(--ink-soft)', fontSize: 14 }}>
+                Shipping to: {order.shipping_address_line1}
+                {order.shipping_address_line2 ? `, ${order.shipping_address_line2}` : ''},{' '}
+                {order.shipping_city}, {order.shipping_state} — {order.shipping_pincode}
+              </p>
+            )}
+
             <p style={{ color: 'var(--ink-soft)' }}>
-              <strong>{order.product_name}</strong>
-              {order.price != null && ` — ₹${Number(order.price).toLocaleString('en-IN')}`}
+              Order status: <strong style={{ textTransform: 'capitalize' }}>{order.status}</strong>
+              {order.tracking_number && <> · Tracking: {order.tracking_number}</>}
             </p>
             <p style={{ color: 'var(--ink-soft)' }}>
-              We&apos;ll be in touch on WhatsApp shortly to arrange delivery. Your order reference
-              is <code>{order.id.slice(0, 8)}</code>.
+              Your order reference is <code>{order.id.slice(0, 8)}</code>.
             </p>
+            <Link href={`/order/${order.id}/invoice`} className="btn btn-outline" style={{ marginRight: 10 }}>
+              View / Print Invoice
+            </Link>
           </>
         ) : order.status === 'pending' ? (
           <>

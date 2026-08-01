@@ -4,6 +4,22 @@ import { createPaymentLink, isRazorpayConfigured } from '@/lib/razorpay';
 
 export const runtime = 'nodejs';
 
+interface CartLine {
+  product_id: string;
+  quantity: number;
+}
+
+interface ShippingInput {
+  name: string;
+  phone: string;
+  email: string | null;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
 export async function POST(req: NextRequest) {
   if (!isRazorpayConfigured()) {
     return NextResponse.json(
@@ -12,36 +28,84 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { product_id } = await req.json();
-  if (!product_id) {
-    return NextResponse.json({ error: 'Missing product_id' }, { status: 400 });
+  const body = await req.json();
+  const items: CartLine[] = body.items || [];
+  const shipping: ShippingInput | undefined = body.shipping;
+
+  if (!items.length) {
+    return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
+  }
+  if (
+    !shipping ||
+    !shipping.name ||
+    !shipping.phone ||
+    !shipping.line1 ||
+    !shipping.city ||
+    !shipping.state ||
+    !shipping.pincode
+  ) {
+    return NextResponse.json({ error: 'Please fill in your shipping address' }, { status: 400 });
   }
 
   const admin = supabaseAdmin();
-  const { data: product, error: productError } = await admin
+
+  // Re-fetch products server-side — never trust client-sent prices.
+  const productIds = items.map((i) => i.product_id);
+  const { data: products, error: productsError } = await admin
     .from('products')
     .select('*')
-    .eq('id', product_id)
-    .single();
+    .in('id', productIds);
 
-  if (productError || !product) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+  if (productsError || !products || products.length !== productIds.length) {
+    return NextResponse.json({ error: 'One or more items could not be found' }, { status: 404 });
   }
-  if (!product.is_available || product.quantity < 1) {
-    return NextResponse.json({ error: 'This item is currently sold out.' }, { status: 400 });
+
+  let subtotal = 0;
+  const lineItems: { product_id: string; product_name: string; price: number; quantity: number }[] = [];
+
+  for (const line of items) {
+    const product = products.find((p) => p.id === line.product_id);
+    if (!product) {
+      return NextResponse.json({ error: 'One or more items could not be found' }, { status: 404 });
+    }
+    if (!product.is_available || product.quantity < line.quantity) {
+      return NextResponse.json(
+        { error: `"${product.name}" doesn't have enough stock available.` },
+        { status: 400 }
+      );
+    }
+    if (product.price == null) {
+      return NextResponse.json({ error: `"${product.name}" has no price set yet.` }, { status: 400 });
+    }
+    subtotal += product.price * line.quantity;
+    lineItems.push({
+      product_id: product.id,
+      product_name: product.name,
+      price: product.price,
+      quantity: line.quantity,
+    });
   }
-  if (product.price == null) {
-    return NextResponse.json({ error: 'This item has no price set yet.' }, { status: 400 });
-  }
+
+  const shippingFee = 0; // keep in sync with SHIPPING_FEE on the checkout page
+  const total = subtotal + shippingFee;
 
   const { data: order, error: orderError } = await admin
     .from('orders')
     .insert({
-      product_id: product.id,
-      product_name: product.name,
-      price: product.price,
-      quantity: 1,
       status: 'pending',
+      buyer_name: shipping.name,
+      buyer_phone: shipping.phone,
+      buyer_email: shipping.email,
+      shipping_name: shipping.name,
+      shipping_phone: shipping.phone,
+      shipping_address_line1: shipping.line1,
+      shipping_address_line2: shipping.line2,
+      shipping_city: shipping.city,
+      shipping_state: shipping.state,
+      shipping_pincode: shipping.pincode,
+      subtotal,
+      shipping_fee: shippingFee,
+      total,
     })
     .select()
     .single();
@@ -50,20 +114,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not create order' }, { status: 500 });
   }
 
+  const { error: itemsError } = await admin
+    .from('order_items')
+    .insert(lineItems.map((li) => ({ ...li, order_id: order.id })));
+
+  if (itemsError) {
+    return NextResponse.json({ error: 'Could not save order items' }, { status: 500 });
+  }
+
   const siteUrl = req.nextUrl.origin;
+  const description =
+    lineItems.length === 1 ? lineItems[0].product_name : `${lineItems.length} items from Agavai`;
 
   try {
     const link = await createPaymentLink({
       orderId: order.id,
-      amountInRupees: product.price,
-      description: product.name,
+      amountInRupees: total,
+      description,
       callbackUrl: `${siteUrl}/order/${order.id}`,
     });
 
-    await admin
-      .from('orders')
-      .update({ razorpay_payment_link_id: link.id })
-      .eq('id', order.id);
+    await admin.from('orders').update({ razorpay_payment_link_id: link.id }).eq('id', order.id);
 
     return NextResponse.json({ url: link.short_url });
   } catch (err: any) {

@@ -9,12 +9,22 @@ export const revalidate = 0;
 
 async function getOrders(): Promise<Order[]> {
   const admin = supabaseAdmin();
-  const { data } = await admin
+  const { data: orders } = await admin
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(200);
-  return data || [];
+  if (!orders || orders.length === 0) return [];
+
+  const { data: items } = await admin
+    .from('order_items')
+    .select('*')
+    .in(
+      'order_id',
+      orders.map((o) => o.id)
+    );
+
+  return orders.map((o) => ({ ...o, items: (items || []).filter((i) => i.order_id === o.id) }));
 }
 
 export default async function AdminOrdersPage() {
@@ -23,9 +33,10 @@ export default async function AdminOrdersPage() {
   }
 
   const orders = await getOrders();
-  const paidOrders = orders.filter((o) => o.status === 'paid');
-  const paidTotal = paidOrders.reduce((sum, o) => sum + (o.price || 0), 0);
-  const needsDispatch = paidOrders.filter((o) => !o.is_dispatched).length;
+  const revenueStatuses = ['paid', 'packed', 'shipped', 'delivered'];
+  const revenueOrders = orders.filter((o) => revenueStatuses.includes(o.status));
+  const paidTotal = revenueOrders.reduce((sum, o) => sum + (o.total || o.price || 0), 0);
+  const needsAction = orders.filter((o) => ['paid', 'packed', 'shipped'].includes(o.status)).length;
 
   return (
     <div className="admin-shell">
@@ -44,12 +55,12 @@ export default async function AdminOrdersPage() {
       </div>
 
       <p style={{ fontSize: 14, color: 'var(--ink-soft)' }}>
-        Total paid: <strong>₹{paidTotal.toLocaleString('en-IN')}</strong>
-        {needsDispatch > 0 && (
+        Total revenue: <strong>₹{paidTotal.toLocaleString('en-IN')}</strong>
+        {needsAction > 0 && (
           <>
             {' · '}
             <strong style={{ color: 'var(--clay)' }}>
-              {needsDispatch} order{needsDispatch > 1 ? 's' : ''} awaiting dispatch
+              {needsAction} order{needsAction > 1 ? 's' : ''} need next step
             </strong>
           </>
         )}

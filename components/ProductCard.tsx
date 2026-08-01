@@ -3,6 +3,8 @@ import type { Product } from '@/lib/types';
 
 export default function ProductCard({ product }: { product: Product }) {
   const cover = product.media[0];
+  const isSold = !product.is_available;
+  const isOutOfStock = !isSold && product.quantity <= 0;
 
   return (
     <Link href={`/product/${product.id}`} className="product-card">
@@ -29,7 +31,15 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         <span className="product-card__badge">{product.category}</span>
-        {!product.is_available && <div className="product-card__sold">Sold</div>}
+        {isSold && <div className="product-card__sold">Sold</div>}
+        {isOutOfStock && (
+          <div className="product-card__sold">
+            Out of Stock
+            {product.restock_message && (
+              <span className="product-card__restock">{product.restock_message}</span>
+            )}
+          </div>
+        )}
       </div>
       <div className="product-card__ledge" aria-hidden="true" />
       <div className="product-card__meta">

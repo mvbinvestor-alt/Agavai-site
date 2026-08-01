@@ -24,6 +24,7 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [quantity, setQuantity] = useState(product?.quantity != null ? String(product.quantity) : '1');
   const [description, setDescription] = useState(product?.description || '');
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
+  const [restockMessage, setRestockMessage] = useState(product?.restock_message || '');
   const [aiEnhance, setAiEnhance] = useState(true);
   const [media, setMedia] = useState<MediaItem[]>(
     (product?.media || []).map((m: ProductMedia) => ({ url: m.url, type: m.type, tempId: m.id }))
@@ -101,6 +102,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       quantity: quantity === '' ? 1 : Math.max(0, Number(quantity)),
       description: description.trim(),
       is_available: isAvailable,
+      restock_message: restockMessage.trim() || null,
       media: media.map((m) => ({ url: m.url, type: m.type })),
     };
 
@@ -204,6 +206,21 @@ export default function ProductForm({ product }: { product?: Product }) {
           In stock / available
         </label>
       </div>
+
+      {Number(quantity) <= 0 && (
+        <div className="field">
+          <label htmlFor="restockMessage">
+            Restock message (shown to shoppers instead of &quot;Sold&quot;)
+          </label>
+          <input
+            id="restockMessage"
+            type="text"
+            placeholder="e.g. Restocking in 2 weeks"
+            value={restockMessage}
+            onChange={(e) => setRestockMessage(e.target.value)}
+          />
+        </div>
+      )}
 
       <div className="field">
         <label>Photos &amp; videos</label>
