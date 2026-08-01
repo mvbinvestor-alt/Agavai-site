@@ -20,10 +20,10 @@ export default function Header() {
           <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
             Instagram
           </a>
-          <Link href="/cart" className="cart-link">
-            Cart{count > 0 && <span className="cart-badge">{count}</span>}
-          </Link>
         </nav>
+        <Link href="/cart" className="cart-link">
+          🛍️{count > 0 && <span className="cart-badge">{count}</span>}
+        </Link>
       </div>
     </header>
   );

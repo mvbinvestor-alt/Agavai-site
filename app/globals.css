@@ -80,7 +80,7 @@ button {
 .site-header__row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   padding: 16px 0;
 }
 
@@ -88,6 +88,7 @@ button {
   display: flex;
   align-items: center;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .wordmark__logo {
@@ -107,6 +108,15 @@ button {
   gap: 22px;
   font-size: 14px;
   letter-spacing: 0.02em;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 480px) {
@@ -823,6 +833,12 @@ button {
 
 .cart-link {
   position: relative;
+  flex-shrink: 0;
+  font-size: 22px;
+  line-height: 1;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
 }
 
 .cart-badge {
