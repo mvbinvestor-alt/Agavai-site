@@ -43,19 +43,17 @@ export default function CheckoutPage() {
   }, [items, isInternational]);
 
   const total = subtotal + shippingFee;
-  const canSubmit =
-    items.length > 0 &&
-    unshippableItems.length === 0 &&
-    form.name.trim() &&
-    form.phone.trim() &&
-    form.line1.trim() &&
-    form.city.trim() &&
-    form.state.trim() &&
-    form.pincode.trim();
+  const fieldsFilled =
+    form.name.trim() && form.phone.trim() && form.line1.trim() && form.city.trim() && form.state.trim() && form.pincode.trim();
+  const blockedByShipping = items.length === 0 || unshippableItems.length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!fieldsFilled) {
+      setError('Please fill in all the required address fields above.');
+      return;
+    }
+    if (blockedByShipping) return;
     setLoading(true);
     setError('');
     try {
@@ -231,7 +229,12 @@ export default function CheckoutPage() {
 
             {error && <div className="error-text" style={{ marginTop: 12 }}>{error}</div>}
 
-            <button className="btn" type="submit" disabled={!canSubmit || loading} style={{ marginTop: 20 }}>
+            <button
+              className="btn"
+              type="submit"
+              disabled={blockedByShipping || loading}
+              style={{ marginTop: 20 }}
+            >
               {loading
                 ? 'Starting checkout…'
                 : unshippableItems.length > 0
