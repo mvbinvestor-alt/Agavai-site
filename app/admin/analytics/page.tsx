@@ -25,6 +25,44 @@ async function getViews(): Promise<Row[]> {
   return data || [];
 }
 
+async function getProductNames(): Promise<Record<string, string>> {
+  const admin = supabaseAdmin();
+  const { data } = await admin.from('products').select('id, name');
+  const map: Record<string, string> = {};
+  for (const p of data || []) map[p.id] = p.name;
+  return map;
+}
+
+async function getCartAdds(): Promise<{ product_id: string | null; product_name: string; created_at: string }[]> {
+  const admin = supabaseAdmin();
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
+  const { data } = await admin
+    .from('product_interest_events')
+    .select('product_id, product_name, created_at')
+    .gte('created_at', since.toISOString())
+    .limit(5000);
+  return data || [];
+}
+
+async function getPurchases(): Promise<{ product_id: string | null; product_name: string; quantity: number }[]> {
+  const admin = supabaseAdmin();
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
+  const { data: orders } = await admin
+    .from('orders')
+    .select('id')
+    .in('status', ['paid', 'packed', 'shipped', 'delivered'])
+    .gte('created_at', since.toISOString());
+  const orderIds = (orders || []).map((o) => o.id);
+  if (orderIds.length === 0) return [];
+  const { data } = await admin
+    .from('order_items')
+    .select('product_id, product_name, quantity')
+    .in('order_id', orderIds);
+  return data || [];
+}
+
 function dayKey(iso: string) {
   return iso.slice(0, 10); // YYYY-MM-DD
 }
@@ -35,6 +73,9 @@ export default async function AnalyticsPage() {
   }
 
   const views = await getViews();
+  const productNames = await getProductNames();
+  const cartAdds = await getCartAdds();
+  const purchases = await getPurchases();
   const now = Date.now();
   const last24h = views.filter((v) => now - new Date(v.created_at).getTime() < 24 * 60 * 60 * 1000);
   const last7d = views.filter((v) => now - new Date(v.created_at).getTime() < 7 * 24 * 60 * 60 * 1000);
@@ -43,7 +84,12 @@ export default async function AnalyticsPage() {
   for (const v of last7d) byPath[v.path] = (byPath[v.path] || 0) + 1;
   const topPages = Object.entries(byPath)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+    .slice(0, 10)
+    .map(([path, count]) => {
+      const match = path.match(/^\/product\/([a-f0-9-]+)/i);
+      const label = match && productNames[match[1]] ? productNames[match[1]] : path;
+      return { label, count };
+    });
 
   const byReferrer: Record<string, number> = {};
   for (const v of last7d) {
@@ -67,6 +113,39 @@ export default async function AnalyticsPage() {
     byCountry[c] = (byCountry[c] || 0) + 1;
   }
   const topCountries = Object.entries(byCountry).sort((a, b) => b[1] - a[1]);
+
+  // Product interest funnel: views -> cart adds -> actual purchases, per product.
+  const productViewCounts: Record<string, number> = {};
+  for (const v of last7d) {
+    const match = v.path.match(/^\/product\/([a-f0-9-]+)/i);
+    if (match) productViewCounts[match[1]] = (productViewCounts[match[1]] || 0) + 1;
+  }
+  const productAddCounts: Record<string, number> = {};
+  const addNameFallback: Record<string, string> = {};
+  for (const a of cartAdds) {
+    if (!a.product_id) continue;
+    productAddCounts[a.product_id] = (productAddCounts[a.product_id] || 0) + 1;
+    addNameFallback[a.product_id] = a.product_name;
+  }
+  const productPurchaseCounts: Record<string, number> = {};
+  for (const p of purchases) {
+    if (!p.product_id) continue;
+    productPurchaseCounts[p.product_id] = (productPurchaseCounts[p.product_id] || 0) + p.quantity;
+    addNameFallback[p.product_id] = addNameFallback[p.product_id] || p.product_name;
+  }
+  const allProductIds = new Set([
+    ...Object.keys(productViewCounts),
+    ...Object.keys(productAddCounts),
+    ...Object.keys(productPurchaseCounts),
+  ]);
+  const productInterest = Array.from(allProductIds)
+    .map((id) => ({
+      name: productNames[id] || addNameFallback[id] || 'Unknown product',
+      views: productViewCounts[id] || 0,
+      adds: productAddCounts[id] || 0,
+      purchased: productPurchaseCounts[id] || 0,
+    }))
+    .sort((a, b) => b.views - a.views);
 
   const byDay: Record<string, number> = {};
   for (const v of views) byDay[dayKey(v.created_at)] = (byDay[dayKey(v.created_at)] || 0) + 1;
@@ -132,9 +211,9 @@ export default async function AnalyticsPage() {
           {topPages.length === 0 ? (
             <p style={{ color: 'var(--ink-soft)', fontSize: 14 }}>No visits yet.</p>
           ) : (
-            topPages.map(([path, count]) => (
-              <div key={path} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
-                <span>{path}</span>
+            topPages.map(({ label, count }) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
+                <span>{label}</span>
                 <strong>{count}</strong>
               </div>
             ))
@@ -169,6 +248,52 @@ export default async function AnalyticsPage() {
           )}
         </div>
       </div>
+
+      <h3 style={{ fontSize: 16, margin: '30px 0 10px' }}>Product interest (7 days)</h3>
+      {productInterest.length === 0 ? (
+        <p style={{ color: 'var(--ink-soft)', fontSize: 14 }}>No product activity yet.</p>
+      ) : (
+        <div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 60px 60px 70px',
+              fontSize: 12,
+              color: 'var(--ink-soft)',
+              padding: '4px 0',
+              borderBottom: '1px solid var(--line)',
+            }}
+          >
+            <span>Product</span>
+            <span style={{ textAlign: 'right' }}>Views</span>
+            <span style={{ textAlign: 'right' }}>Added</span>
+            <span style={{ textAlign: 'right' }}>Bought</span>
+          </div>
+          {productInterest.map((p) => (
+            <div
+              key={p.name}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 60px 60px 70px',
+                fontSize: 14,
+                padding: '6px 0',
+                borderBottom: '1px solid var(--line)',
+              }}
+            >
+              <span>{p.name}</span>
+              <span style={{ textAlign: 'right' }}>{p.views}</span>
+              <span style={{ textAlign: 'right' }}>{p.adds}</span>
+              <span style={{ textAlign: 'right', color: p.adds > 0 && p.purchased === 0 ? 'var(--clay)' : undefined }}>
+                {p.purchased}
+              </span>
+            </div>
+          ))}
+          <p style={{ color: 'var(--ink-soft)', fontSize: 12, marginTop: 10 }}>
+            Added but not bought (shown in orange) often points to price, shipping cost, or a
+            photo/description issue losing people right at checkout.
+          </p>
+        </div>
+      )}
 
       <p style={{ color: 'var(--ink-soft)', fontSize: 12, marginTop: 30 }}>
         Counts every page load, including repeat visits from the same person — this is traffic

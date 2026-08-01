@@ -25,11 +25,21 @@ export default function AddToCartButton({
   const router = useRouter();
   const [added, setAdded] = useState(false);
 
+  function trackInterest() {
+    fetch('/api/track/cart-add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId, product_name: name }),
+      keepalive: true,
+    }).catch(() => {});
+  }
+
   function handleAdd() {
     addItem(
       { product_id: productId, name, price, image, maxQuantity, shippingDomestic, shippingInternational },
       1
     );
+    trackInterest();
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   }
@@ -39,6 +49,7 @@ export default function AddToCartButton({
       { product_id: productId, name, price, image, maxQuantity, shippingDomestic, shippingInternational },
       1
     );
+    trackInterest();
     router.push('/checkout');
   }
 
