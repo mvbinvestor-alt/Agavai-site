@@ -94,39 +94,43 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
             {isUpiConfigured() && order.total != null ? (
               <>
                 <p style={{ color: 'var(--ink-soft)' }}>
-                  Tap below to pay ₹{Number(order.total).toLocaleString('en-IN')} via GPay, PhonePe, or any
-                  UPI app.
+                  Pay ₹{Number(order.total).toLocaleString('en-IN')} via UPI — open GPay, PhonePe, or any
+                  UPI app and send it to:
                 </p>
-                <a
-                  href={buildUpiLink({ amount: order.total, orderId: order.id })}
-                  className="btn"
-                  style={{ display: 'inline-block', marginRight: 10, marginBottom: 10 }}
-                >
-                  Pay ₹{Number(order.total).toLocaleString('en-IN')} via UPI
-                </a>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', margin: '10px 0' }}>
+                  <CopyUpiId upiId={getUpiId()} />
+                  <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{getUpiPayeeName()}</span>
+                </div>
+
                 {WHATSAPP_NUMBER && (
                   <a
                     href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                       `Hi Agavai! I've paid for order ${order.id.slice(0, 8)} via UPI — here's my screenshot.`
                     )}`}
-                    className="btn btn-outline"
-                    style={{ display: 'inline-block', marginBottom: 10 }}
+                    className="btn"
+                    style={{ display: 'inline-block', marginRight: 10, marginBottom: 10 }}
                   >
                     Send Screenshot on WhatsApp
                   </a>
                 )}
 
-                <div style={{ marginTop: 8, padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 6 }}>
-                  <p style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 8 }}>
-                    Button not opening your UPI app? (This happens sometimes on iPhone.) Pay manually
-                    instead — open GPay/PhonePe yourself and send ₹
-                    {Number(order.total).toLocaleString('en-IN')} to:
+                <details style={{ marginTop: 8 }}>
+                  <summary style={{ fontSize: 13, color: 'var(--ink-soft)', cursor: 'pointer' }}>
+                    Have GPay or PhonePe installed? Try quick-pay instead
+                  </summary>
+                  <a
+                    href={buildUpiLink({ amount: order.total, orderId: order.id })}
+                    className="btn btn-outline"
+                    style={{ display: 'inline-block', marginTop: 10 }}
+                  >
+                    Pay ₹{Number(order.total).toLocaleString('en-IN')} via UPI app
+                  </a>
+                  <p style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 6 }}>
+                    Note: on some phones this opens whichever app has claimed UPI links (sometimes
+                    WhatsApp, if it has UPI payments set up), not necessarily GPay. If it opens the
+                    wrong app, use the Copy UPI ID method above instead.
                   </p>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <CopyUpiId upiId={getUpiId()} />
-                    <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{getUpiPayeeName()}</span>
-                  </div>
-                </div>
+                </details>
 
                 <p style={{ color: 'var(--ink-soft)', fontSize: 13, marginTop: 12 }}>
                   We confirm UPI payments manually — sending your screenshot on WhatsApp speeds this up.
