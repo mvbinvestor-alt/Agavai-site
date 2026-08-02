@@ -1,0 +1,94 @@
+erDiagram
+    PRODUCTS ||--o{ PRODUCT_MEDIA : "has photos/videos"
+    PRODUCTS ||--o{ ORDER_ITEMS : "ordered as"
+    PRODUCTS ||--o{ PRODUCT_INTEREST_EVENTS : "added to cart"
+    ORDERS ||--o{ ORDER_ITEMS : "contains"
+
+    PRODUCTS {
+        uuid id PK
+        text name
+        text sku UK
+        text category
+        text material
+        numeric price
+        integer quantity
+        text description
+        boolean is_available
+        text restock_message
+        numeric shipping_price_domestic
+        numeric shipping_price_international
+        timestamptz created_at
+    }
+
+    PRODUCT_MEDIA {
+        uuid id PK
+        uuid product_id FK
+        text type "image | video"
+        text url
+        int sort_order
+    }
+
+    ORDERS {
+        uuid id PK
+        uuid product_id FK "legacy, pre-cart orders only"
+        text product_name "legacy"
+        numeric price "legacy"
+        integer quantity "legacy"
+        text buyer_name
+        text buyer_phone
+        text buyer_email
+        text shipping_name
+        text shipping_phone
+        text shipping_address_line1
+        text shipping_address_line2
+        text shipping_city
+        text shipping_state
+        text shipping_pincode
+        text shipping_country
+        numeric subtotal
+        numeric shipping_fee
+        numeric total
+        text status "pending|paid|packed|shipped|delivered|failed|cancelled|expired|returned"
+        boolean is_dispatched "legacy, superseded by status"
+        timestamptz dispatched_at "legacy"
+        text razorpay_payment_link_id
+        text razorpay_payment_id
+        text tracking_number
+        text tracking_url
+        timestamptz created_at
+        timestamptz paid_at
+        timestamptz packed_at
+        timestamptz shipped_at
+        timestamptz delivered_at
+    }
+
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK "nullable, set null if product deleted"
+        text product_name
+        numeric price
+        integer quantity
+    }
+
+    PAGE_VIEWS {
+        uuid id PK
+        text path
+        text referrer
+        text country
+        timestamptz created_at
+    }
+
+    IP_COUNTRY_CACHE {
+        text ip_hash PK "sha256 of visitor IP"
+        text country
+        timestamptz looked_up_at
+    }
+
+    PRODUCT_INTEREST_EVENTS {
+        uuid id PK
+        uuid product_id FK "nullable, set null if product deleted"
+        text product_name
+        text event "add_to_cart"
+        timestamptz created_at
+    }

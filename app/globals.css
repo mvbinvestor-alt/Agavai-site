@@ -105,6 +105,7 @@ button {
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 22px;
   font-size: 14px;
   letter-spacing: 0.02em;
@@ -112,7 +113,7 @@ button {
   white-space: nowrap;
   scrollbar-width: none;
   min-width: 0;
-  flex: 1;
+  margin-right: auto;
 }
 
 .nav-links::-webkit-scrollbar {
@@ -832,31 +833,31 @@ button {
 /* ---------- Cart & checkout (Phase 1) ---------- */
 
 .cart-link {
-  position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: #fff;
+  background: var(--brass);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--ink);
-  line-height: 1;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
+  padding: 7px 14px;
+  border-radius: 999px;
 }
 
 @media (max-width: 480px) {
   .cart-link {
     font-size: 12.5px;
+    padding: 6px 11px;
   }
 }
 
 .cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -14px;
   background: var(--clay);
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   border-radius: 999px;
   padding: 1px 6px;
