@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = getClientIp(req.headers);
-    const country = ip ? await getCountryForIp(ip) : null;
+    const country = await getCountryForIp(ip);
 
     const admin = supabaseAdmin();
     await admin.from('page_views').insert({
