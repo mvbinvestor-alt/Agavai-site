@@ -3,8 +3,10 @@ import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import AdminLogin from '@/components/AdminLogin';
 import AdminProductList from '@/components/AdminProductList';
+import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
+import { getSetting } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -28,9 +30,11 @@ export default async function AdminPage() {
   }
 
   const products = await getAllProducts();
+  const noticeEnabled = (await getSetting('catalog_notice_enabled', 'true')) !== 'false';
 
   return (
     <div className="admin-shell">
+      <CatalogNoticeToggle initialEnabled={noticeEnabled} />
       <div
         style={{
           display: 'flex',

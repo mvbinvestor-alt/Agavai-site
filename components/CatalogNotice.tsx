@@ -1,7 +1,11 @@
 import { instagramProfileLink, instagramDmLink } from '@/lib/instagram';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { getSetting } from '@/lib/settings';
 
-export default function CatalogNotice() {
+export default async function CatalogNotice() {
+  const enabled = (await getSetting('catalog_notice_enabled', 'true')) !== 'false';
+  if (!enabled) return null;
+
   return (
     <div className="wrap">
       <div className="catalog-notice">
