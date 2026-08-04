@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CatalogGrid from '@/components/CatalogGrid';
+import CatalogNotice from '@/components/CatalogNotice';
 import PokkishamStrip from '@/components/PokkishamStrip';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { supabasePublic } from '@/lib/supabase';
@@ -48,6 +49,7 @@ export default async function HomePage() {
       </section>
 
       <PokkishamStrip products={products} />
+      <CatalogNotice />
       <CatalogGrid products={products} />
       <Footer />
     </>

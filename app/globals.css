@@ -1004,3 +1004,24 @@ button {
     display: none;
   }
 }
+
+.catalog-notice {
+  background: rgba(169, 124, 62, 0.12);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 24px 0 0;
+}
+
+.catalog-notice p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.catalog-notice a {
+  color: var(--clay);
+  font-weight: 600;
+  text-decoration: underline;
+}
