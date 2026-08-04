@@ -1,20 +1,21 @@
 import { instagramProfileLink, instagramDmLink } from '@/lib/instagram';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
-import { getSetting } from '@/lib/settings';
+import { getSettings } from '@/lib/settings';
+
+const DEFAULT_TEXT = "We're still adding pieces here — our full range is on Instagram.";
 
 export default async function CatalogNotice() {
-  const enabled = (await getSetting('catalog_notice_enabled', 'true')) !== 'false';
+  const settings = await getSettings(['catalog_notice_enabled', 'catalog_notice_text']);
+  const enabled = settings.catalog_notice_enabled !== 'false';
   if (!enabled) return null;
+
+  const text = settings.catalog_notice_text || DEFAULT_TEXT;
 
   return (
     <div className="wrap">
       <div className="catalog-notice">
         <p>
-          We&apos;re still adding pieces here — our full range is on{' '}
-          <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
-            Instagram
-          </a>
-          . Looking for something specific? Message us on{' '}
+          {text} Looking for something specific? Message us on{' '}
           {WHATSAPP_NUMBER && (
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
               WhatsApp
@@ -23,8 +24,12 @@ export default async function CatalogNotice() {
           {WHATSAPP_NUMBER && ' or '}
           <a href={instagramDmLink()} target="_blank" rel="noopener noreferrer">
             Instagram DM
+          </a>
+          . Or browse{' '}
+          <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
+            our Instagram
           </a>{' '}
-          and we&apos;ll help you find it.
+          for the full range.
         </p>
       </div>
     </div>

@@ -6,7 +6,7 @@ import AdminProductList from '@/components/AdminProductList';
 import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
-import { getSetting } from '@/lib/settings';
+import { getSettings } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -30,11 +30,14 @@ export default async function AdminPage() {
   }
 
   const products = await getAllProducts();
-  const noticeEnabled = (await getSetting('catalog_notice_enabled', 'true')) !== 'false';
+  const settings = await getSettings(['catalog_notice_enabled', 'catalog_notice_text']);
+  const noticeEnabled = settings.catalog_notice_enabled !== 'false';
+  const noticeText =
+    settings.catalog_notice_text || "We're still adding pieces here — our full range is on Instagram.";
 
   return (
     <div className="admin-shell">
-      <CatalogNoticeToggle initialEnabled={noticeEnabled} />
+      <CatalogNoticeToggle initialEnabled={noticeEnabled} initialText={noticeText} />
       <div
         style={{
           display: 'flex',
