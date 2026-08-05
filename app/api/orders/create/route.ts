@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createPaymentLink, isRazorpayConfigured } from '@/lib/razorpay';
 import { isUpiConfigured } from '@/lib/upi';
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
   ) {
     return NextResponse.json({ error: 'Please fill in your shipping address' }, { status: 400 });
   }
-  if (!/^[0-9+\s-]{7,16}$/.test(shipping.phone.trim())) {
+  if (!isValidPhoneNumber(shipping.phone)) {
     return NextResponse.json({ error: 'Please enter a valid phone number' }, { status: 400 });
   }
 

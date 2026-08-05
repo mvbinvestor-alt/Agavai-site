@@ -7,13 +7,15 @@ import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import { instagramDmLink } from '@/lib/instagram';
+import { PhoneInput, toValidatedPhone } from '@/components/PhoneInput';
 
 export default function CheckoutPage() {
   const { items, subtotal, clear, removeItem } = useCart();
   const [country, setCountry] = useState('India');
+  const [phoneCountry, setPhoneCountry] = useState('IN');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [form, setForm] = useState({
     name: '',
-    phone: '',
     email: '',
     line1: '',
     line2: '',
@@ -43,10 +45,10 @@ export default function CheckoutPage() {
   }, [items, isInternational]);
 
   const total = subtotal + shippingFee;
-  const PHONE_RE = /^[0-9+\s-]{7,16}$/;
+  const validatedPhone = toValidatedPhone(phoneCountry, phoneNumber);
   const fieldsFilled =
     form.name.trim() &&
-    PHONE_RE.test(form.phone.trim()) &&
+    !!validatedPhone &&
     form.line1.trim() &&
     form.city.trim() &&
     form.state.trim() &&
@@ -70,7 +72,7 @@ export default function CheckoutPage() {
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
           shipping: {
             name: form.name,
-            phone: form.phone,
+            phone: validatedPhone,
             email: form.email || null,
             line1: form.line1,
             line2: form.line2 || null,
@@ -198,15 +200,11 @@ export default function CheckoutPage() {
                 onChange={(e) => update('name', e.target.value)}
                 required
               />
-              <input
-                placeholder="Phone number"
-                type="tel"
-                inputMode="tel"
-                pattern="[0-9+\s-]{7,16}"
-                title="Enter a valid phone number (digits only, 7-16 characters)"
-                value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
-                required
+              <PhoneInput
+                countryCode={phoneCountry}
+                nationalNumber={phoneNumber}
+                onCountryChange={setPhoneCountry}
+                onNumberChange={setPhoneNumber}
               />
               <input
                 placeholder="Email (optional)"

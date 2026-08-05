@@ -973,7 +973,8 @@ button {
   gap: 10px;
 }
 
-.form-grid input {
+.form-grid input,
+.form-grid select {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 4px;
