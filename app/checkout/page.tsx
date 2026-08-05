@@ -9,7 +9,7 @@ import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import { instagramDmLink } from '@/lib/instagram';
 
 export default function CheckoutPage() {
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, removeItem } = useCart();
   const [country, setCountry] = useState('India');
   const [form, setForm] = useState({
     name: '',
@@ -43,14 +43,20 @@ export default function CheckoutPage() {
   }, [items, isInternational]);
 
   const total = subtotal + shippingFee;
+  const PHONE_RE = /^[0-9+\s-]{7,16}$/;
   const fieldsFilled =
-    form.name.trim() && form.phone.trim() && form.line1.trim() && form.city.trim() && form.state.trim() && form.pincode.trim();
+    form.name.trim() &&
+    PHONE_RE.test(form.phone.trim()) &&
+    form.line1.trim() &&
+    form.city.trim() &&
+    form.state.trim() &&
+    form.pincode.trim();
   const blockedByShipping = items.length === 0 || unshippableItems.length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!fieldsFilled) {
-      setError('Please fill in all the required address fields above.');
+      setError('Please fill in all the required address fields with valid values (check your phone number format).');
       return;
     }
     if (blockedByShipping) return;
@@ -76,7 +82,15 @@ export default function CheckoutPage() {
         }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error || 'Could not start checkout');
+      if (!res.ok) {
+        if (Array.isArray(body.missingIds) && body.missingIds.length > 0) {
+          for (const id of body.missingIds) removeItem(id);
+          throw new Error(
+            'One or more items in your cart are no longer available — they\u2019ve been removed. Please review your cart and try again.'
+          );
+        }
+        throw new Error(body.error || 'Could not start checkout');
+      }
       clear();
       window.location.href = body.url;
     } catch (err: any) {
@@ -186,6 +200,10 @@ export default function CheckoutPage() {
               />
               <input
                 placeholder="Phone number"
+                type="tel"
+                inputMode="tel"
+                pattern="[0-9+\s-]{7,16}"
+                title="Enter a valid phone number (digits only, 7-16 characters)"
                 value={form.phone}
                 onChange={(e) => update('phone', e.target.value)}
                 required

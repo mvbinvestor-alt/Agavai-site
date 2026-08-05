@@ -48,6 +48,9 @@ export async function POST(req: NextRequest) {
   ) {
     return NextResponse.json({ error: 'Please fill in your shipping address' }, { status: 400 });
   }
+  if (!/^[0-9+\s-]{7,16}$/.test(shipping.phone.trim())) {
+    return NextResponse.json({ error: 'Please enter a valid phone number' }, { status: 400 });
+  }
 
   const admin = supabaseAdmin();
 
@@ -59,7 +62,15 @@ export async function POST(req: NextRequest) {
     .in('id', productIds);
 
   if (productsError || !products || products.length !== productIds.length) {
-    return NextResponse.json({ error: 'One or more items could not be found' }, { status: 404 });
+    const foundIds = new Set((products || []).map((p) => p.id));
+    const missingIds = productIds.filter((id) => !foundIds.has(id));
+    return NextResponse.json(
+      {
+        error: 'One or more items in your cart are no longer available and were removed.',
+        missingIds,
+      },
+      { status: 404 }
+    );
   }
 
   let subtotal = 0;
