@@ -41,7 +41,7 @@ export default function CheckoutPage() {
     if (isInternational) {
       return items.reduce((sum, i) => sum + (i.shippingInternational || 0) * i.quantity, 0);
     }
-    return items.reduce((sum, i) => sum + i.shippingDomestic * i.quantity, 0);
+    return items.reduce((sum, i) => sum + (i.shippingDomestic || 0) * i.quantity, 0);
   }, [items, isInternational]);
 
   const total = subtotal + shippingFee;

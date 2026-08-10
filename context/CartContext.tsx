@@ -34,7 +34,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setItems(
+            parsed.map((i: any) => ({
+              ...i,
+              shippingDomestic: typeof i.shippingDomestic === 'number' ? i.shippingDomestic : 0,
+              shippingInternational: typeof i.shippingInternational === 'number' ? i.shippingInternational : null,
+            }))
+          );
+        }
+      }
     } catch {
       // ignore corrupt cart data
     }
