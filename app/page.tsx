@@ -39,7 +39,7 @@ export default async function HomePage() {
             each one sourced, chosen, and placed on the shelf for a home that isn&apos;t
             like anyone else&apos;s. Browse the collection and order straight on WhatsApp.
           </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div className="hero__actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a href="#collection" className="btn">
               Browse the collection
             </a>

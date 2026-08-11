@@ -141,6 +141,11 @@ button {
 .hero {
   padding: 64px 0 40px;
   border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+.hero__actions {
+  justify-content: center;
 }
 
 .hero__eyebrow {
@@ -155,7 +160,7 @@ button {
   font-size: clamp(36px, 6vw, 60px);
   font-style: italic;
   line-height: 1.05;
-  margin: 0 0 18px;
+  margin: 0 auto 18px;
   max-width: 14ch;
 }
 
@@ -164,7 +169,7 @@ button {
   font-size: 17px;
   line-height: 1.6;
   color: var(--ink-soft);
-  margin: 0 0 26px;
+  margin: 0 auto 26px;
 }
 
 .btn {
