@@ -413,6 +413,13 @@ button {
   color: var(--ink-soft);
 }
 
+.footer-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .site-footer a {
   text-decoration: none;
   color: var(--ink-soft);
@@ -1030,4 +1037,39 @@ button {
   color: var(--clay);
   font-weight: 600;
   text-decoration: underline;
+}
+
+/* ---------- Legal pages (privacy/terms/shipping/contact) ---------- */
+
+.legal-page h2 {
+  font-size: 19px;
+  margin: 32px 0 10px;
+}
+
+.legal-page h2:first-child {
+  margin-top: 0;
+}
+
+.legal-page p,
+.legal-page li {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+.legal-page ul {
+  padding-left: 20px;
+  margin: 0 0 12px;
+}
+
+.legal-page a {
+  color: var(--clay);
+  font-weight: 600;
+}
+
+.legal-page .updated {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 30px;
 }

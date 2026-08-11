@@ -25,7 +25,13 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <span>Agavai — a lifestyle brand crafted with soul</span>
-          <a href="/admin">Admin</a>
+          <nav className="footer-links">
+            <a href="/contact">Contact</a>
+            <a href="/shipping-returns">Shipping &amp; Returns</a>
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/admin">Admin</a>
+          </nav>
         </div>
       </div>
     </footer>

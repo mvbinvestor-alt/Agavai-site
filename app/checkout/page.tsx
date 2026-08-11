@@ -257,6 +257,20 @@ export default function CheckoutPage() {
                   ? 'Get a shipping quote above to continue'
                   : `Pay ₹${total.toLocaleString('en-IN')}`}
             </button>
+            <p style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 10 }}>
+              By placing this order, you agree to our{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                Terms
+              </a>
+              , <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                Privacy Policy
+              </a>
+              , and{' '}
+              <a href="/shipping-returns" target="_blank" rel="noopener noreferrer">
+                Shipping &amp; Return Policy
+              </a>
+              .
+            </p>
           </form>
         )}
       </div>
