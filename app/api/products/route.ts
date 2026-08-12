@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { generateSku } from '@/lib/sku';
+import { generateUniqueSku } from '@/lib/sku';
 
 export const runtime = 'nodejs';
 
@@ -53,11 +53,19 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = supabaseAdmin();
+
+  const finalSku =
+    sku ||
+    (await generateUniqueSku(admin, async (candidate) => {
+      const { data } = await admin.from('products').select('id').eq('sku', candidate).limit(1);
+      return !!data && data.length > 0;
+    }));
+
   const { data: product, error } = await admin
     .from('products')
     .insert({
       name,
-      sku: sku || generateSku(),
+      sku: finalSku,
       category,
       material: material || null,
       dimensions: dimensions || null,

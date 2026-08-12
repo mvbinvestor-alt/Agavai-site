@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 import { isAdminAuthed } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { generateSku } from '@/lib/sku';
+import { generateUniqueSku } from '@/lib/sku';
 
 export const runtime = 'nodejs';
 
@@ -109,9 +109,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const finalSku =
+      sku ||
+      (await generateUniqueSku(admin, async (candidate) => {
+        const { data } = await admin.from('products').select('id').eq('sku', candidate).limit(1);
+        return !!data && data.length > 0;
+      }));
+
     const { error } = await admin.from('products').insert({
       ...payload,
-      sku: sku || generateSku(),
+      sku: finalSku,
     });
 
     if (error) {
