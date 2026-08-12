@@ -3,6 +3,8 @@ import Footer from '@/components/Footer';
 import CatalogGrid from '@/components/CatalogGrid';
 import CatalogNotice from '@/components/CatalogNotice';
 import PokkishamStrip from '@/components/PokkishamStrip';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import WhyChooseAgavai from '@/components/WhyChooseAgavai';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
@@ -48,9 +50,11 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <FeaturedProducts products={products} />
       <PokkishamStrip products={products} />
       <CatalogNotice />
       <CatalogGrid products={products} />
+      <WhyChooseAgavai />
       <Footer />
     </>
   );

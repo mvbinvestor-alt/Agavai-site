@@ -36,6 +36,9 @@ export default function ContactPage() {
           )}
         </p>
 
+        <h2>Phone</h2>
+        <p>{WHATSAPP_NUMBER ? `+${WHATSAPP_NUMBER}` : '[Phone number to be added]'}</p>
+
         <h2>Instagram</h2>
         <p>
           <a href={instagramProfileLink()} target="_blank" rel="noopener noreferrer">
@@ -48,6 +51,13 @@ export default function ContactPage() {
           .
         </p>
 
+        <h2>Location</h2>
+        <p>
+          Based in Tiruppur, Tamil Nadu. We&apos;re an online-first boutique without a public
+          showroom — everything is handled directly over WhatsApp and Instagram, from questions to
+          order support.
+        </p>
+
         <h2>Order Support</h2>
         <p>
           For questions about an existing order, please have your order reference (shown on your
@@ -58,7 +68,7 @@ export default function ContactPage() {
         <p>
           Agavai
           <br />
-          [Registered business address — to be added]
+          Tiruppur, Tamil Nadu, India
           <br />
           [GSTIN, if registered — to be added]
         </p>

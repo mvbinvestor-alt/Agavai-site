@@ -44,6 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="product-card__ledge" aria-hidden="true" />
       <div className="product-card__meta">
         <h3 className="product-card__name">{product.name}</h3>
+        {product.sku && <div className="product-card__sku">ID: {product.sku}</div>}
         {product.price != null && (
           <div className="product-card__price">₹{Number(product.price).toLocaleString('en-IN')}</div>
         )}

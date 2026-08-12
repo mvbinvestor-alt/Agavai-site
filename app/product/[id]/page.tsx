@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -21,10 +22,36 @@ async function getProduct(id: string): Promise<Product | null> {
   return data as Product;
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) return { title: 'Product Not Found — Agavai' };
+
+  const description = product.description
+    ? product.description.slice(0, 155)
+    : `${product.name} — handcrafted decor and antiques from Agavai.`;
+
+  return {
+    title: `${product.name} — Agavai`,
+    description,
+    openGraph: {
+      title: `${product.name} — Agavai`,
+      description,
+      images: product.media[0]?.url ? [product.media[0].url] : undefined,
+      type: 'website',
+    },
+  };
+}
+
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = await getProduct(id);
   if (!product) notFound();
+
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const productUrl = host ? `${protocol}://${host}/product/${product.id}` : undefined;
 
   return (
     <>
@@ -37,16 +64,33 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <div>
             <div className="pd-cat">{product.category}</div>
             <h1 className="pd-name">{product.name}</h1>
+            {product.sku && <div className="pd-sku">Product ID: {product.sku}</div>}
             {product.price != null && (
               <div className="pd-price">₹{Number(product.price).toLocaleString('en-IN')}</div>
             )}
 
             {product.description && <p className="pd-desc">{product.description}</p>}
 
-            {product.material && (
+            {(product.material || product.dimensions || product.origin) && (
               <dl className="pd-facts">
-                <dt>Material</dt>
-                <dd>{product.material}</dd>
+                {product.material && (
+                  <>
+                    <dt>Material</dt>
+                    <dd>{product.material}</dd>
+                  </>
+                )}
+                {product.dimensions && (
+                  <>
+                    <dt>Dimensions</dt>
+                    <dd>{product.dimensions}</dd>
+                  </>
+                )}
+                {product.origin && (
+                  <>
+                    <dt>Origin</dt>
+                    <dd>{product.origin}</dd>
+                  </>
+                )}
               </dl>
             )}
 
@@ -61,7 +105,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   shippingDomestic={product.shipping_price_domestic}
                   shippingInternational={product.shipping_price_international}
                 />
-                <WhatsAppButton productName={product.name} />
+                <WhatsAppButton productName={product.name} productSku={product.sku} productUrl={productUrl} />
               </div>
             ) : !product.is_available ? (
               <span className="btn btn-outline" style={{ pointerEvents: 'none', opacity: 0.6 }}>

@@ -359,6 +359,13 @@ button {
   margin: 0 0 4px;
 }
 
+.product-card__sku {
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
 .product-card__price {
   font-size: 14px;
   color: var(--ink-soft);
@@ -496,6 +503,13 @@ button {
   font-size: clamp(28px, 4vw, 40px);
   font-style: italic;
   margin: 0 0 10px;
+}
+
+.pd-sku {
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  margin: -4px 0 14px;
 }
 
 .pd-price {
@@ -744,6 +758,76 @@ button {
   .pokkisham-strip__item {
     flex-basis: 170px;
   }
+}
+
+/* ---------- Featured Products ---------- */
+
+.featured-strip {
+  padding: 44px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.featured-strip__title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-style: italic;
+  margin: 4px 0 22px;
+}
+
+.featured-strip__row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.featured-strip__item {
+  flex: 0 0 200px;
+}
+
+@media (max-width: 480px) {
+  .featured-strip__item {
+    flex-basis: 170px;
+  }
+}
+
+/* ---------- Why Choose Agavai ---------- */
+
+.why-strip {
+  background: var(--ivory-deep);
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.why-strip__title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-style: italic;
+  margin: 4px 0 28px;
+}
+
+.why-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 640px) {
+  .why-strip__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.why-strip__item h3 {
+  font-size: 16px;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.why-strip__item p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
 }
 
 /* ---------- About page ---------- */

@@ -20,6 +20,9 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [sku, setSku] = useState(product?.sku || '');
   const [category, setCategory] = useState(product?.category || '');
   const [material, setMaterial] = useState(product?.material || '');
+  const [dimensions, setDimensions] = useState(product?.dimensions || '');
+  const [origin, setOrigin] = useState(product?.origin || '');
+  const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
   const [price, setPrice] = useState(product?.price != null ? String(product.price) : '');
   const [quantity, setQuantity] = useState(product?.quantity != null ? String(product.quantity) : '1');
   const [description, setDescription] = useState(product?.description || '');
@@ -104,6 +107,9 @@ export default function ProductForm({ product }: { product?: Product }) {
       sku: sku.trim() || null,
       category: category.trim(),
       material: material.trim(),
+      dimensions: dimensions.trim() || null,
+      origin: origin.trim() || null,
+      is_featured: isFeatured,
       price: price === '' ? null : Number(price),
       quantity: quantity === '' ? 1 : Math.max(0, Number(quantity)),
       description: description.trim(),
@@ -170,6 +176,40 @@ export default function ProductForm({ product }: { product?: Product }) {
           value={material}
           onChange={(e) => setMaterial(e.target.value)}
         />
+      </div>
+
+      <div className="field">
+        <label htmlFor="dimensions">Dimensions</label>
+        <input
+          id="dimensions"
+          type="text"
+          placeholder="e.g. 45cm H x 20cm W x 15cm D"
+          value={dimensions}
+          onChange={(e) => setDimensions(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="origin">Origin</label>
+        <input
+          id="origin"
+          type="text"
+          placeholder="e.g. Karaikudi, Tamil Nadu"
+          value={origin}
+          onChange={(e) => setOrigin(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label>
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            style={{ marginRight: 8 }}
+          />
+          Feature on homepage
+        </label>
       </div>
 
       <div className="field">

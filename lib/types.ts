@@ -14,6 +14,9 @@ export interface Product {
   sku: string | null;
   category: string;
   material: string | null;
+  dimensions: string | null;
+  origin: string | null;
+  is_featured: boolean;
   price: number | null;
   quantity: number;
   description: string | null;
