@@ -33,6 +33,8 @@ export default function Footer() {
             <a href="/admin">Admin</a>
           </nav>
         </div>
+
+        <div className="footer-credit">Powered by Zyvolve Inc, UAE</div>
       </div>
     </footer>
   );

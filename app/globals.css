@@ -415,6 +415,15 @@ button {
   justify-content: center;
 }
 
+.footer-credit {
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0.6;
+  margin-top: 14px;
+  letter-spacing: 0.02em;
+}
+
 .footer-bottom a {
   text-decoration: none;
   color: var(--ink-soft);
