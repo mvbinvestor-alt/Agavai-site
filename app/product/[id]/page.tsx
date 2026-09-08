@@ -53,8 +53,39 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const protocol = host?.includes('localhost') ? 'http' : 'https';
   const productUrl = host ? `${protocol}://${host}/product/${product.id}` : undefined;
 
+  const isPokkisham = product.category.toLowerCase().includes('pokkisham');
+  const jsonLd: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description:
+      product.description || `${product.name} — handcrafted decor and antiques from Agavai.`,
+    sku: product.sku || undefined,
+    image: product.media.map((m) => m.url),
+    brand: { '@type': 'Brand', name: 'Agavai' },
+  };
+  if (product.price != null) {
+    jsonLd.offers = {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'INR',
+      price: product.price,
+      availability:
+        product.is_available && product.quantity > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      itemCondition: isPokkisham ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
+    };
+  }
+  // Escape "</" so a description containing it can't prematurely close the script tag.
+  const jsonLdString = JSON.stringify(jsonLd).replace(/<\//g, '<\\/');
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString }}
+      />
       <Header />
       <div className="wrap">
         <div className="product-detail">

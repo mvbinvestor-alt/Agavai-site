@@ -6,6 +6,7 @@ import PokkishamStrip from '@/components/PokkishamStrip';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import WhyChooseAgavai from '@/components/WhyChooseAgavai';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { instagramProfileLink } from '@/lib/instagram';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 
@@ -29,8 +30,23 @@ async function getProducts(): Promise<Product[]> {
 export default async function HomePage() {
   const products = await getProducts();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Agavai',
+    url: 'https://agavai.in',
+    logo: 'https://agavai.in/logo-header.png',
+    sameAs: [instagramProfileLink()],
+    description:
+      'Agavai curates vintage treasures (Agavai Pokkisham) and handcrafted heritage decor from Tamil Nadu.',
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       <section className="hero">
         <div className="wrap">
