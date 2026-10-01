@@ -3,6 +3,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createPaymentLink, isRazorpayConfigured } from '@/lib/razorpay';
 import { isUpiConfigured } from '@/lib/upi';
+import { getSetting } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 
@@ -27,6 +28,17 @@ export async function POST(req: NextRequest) {
   if (!isRazorpayConfigured() && !isUpiConfigured()) {
     return NextResponse.json(
       { error: 'Payments are not set up yet on this site. Please order via WhatsApp instead.' },
+      { status: 503 }
+    );
+  }
+
+  const checkoutPaused = (await getSetting('checkout_paused')) === 'true';
+  if (checkoutPaused) {
+    return NextResponse.json(
+      {
+        error:
+          "Online checkout is paused right now — please message us on WhatsApp or Instagram DM to complete your order.",
+      },
       { status: 503 }
     );
   }

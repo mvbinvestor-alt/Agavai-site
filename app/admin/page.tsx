@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import AdminLogin from '@/components/AdminLogin';
 import AdminProductList from '@/components/AdminProductList';
 import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
+import CheckoutPausedToggle from '@/components/CheckoutPausedToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
 import { getSettings } from '@/lib/settings';
@@ -30,13 +31,23 @@ export default async function AdminPage() {
   }
 
   const products = await getAllProducts();
-  const settings = await getSettings(['catalog_notice_enabled', 'catalog_notice_text']);
+  const settings = await getSettings([
+    'catalog_notice_enabled',
+    'catalog_notice_text',
+    'checkout_paused',
+    'checkout_paused_message',
+  ]);
   const noticeEnabled = settings.catalog_notice_enabled !== 'false';
   const noticeText =
     settings.catalog_notice_text || "We're still adding pieces here — our full range is on Instagram.";
+  const checkoutPaused = settings.checkout_paused === 'true';
+  const checkoutPausedMessage =
+    settings.checkout_paused_message ||
+    "We're confirming orders manually right now while we fine-tune shipping — message us on WhatsApp or Instagram with what you'd like, and we'll help you complete your order and payment there.";
 
   return (
     <div className="admin-shell">
+      <CheckoutPausedToggle initialPaused={checkoutPaused} initialMessage={checkoutPausedMessage} />
       <CatalogNoticeToggle initialEnabled={noticeEnabled} initialText={noticeText} />
       <div
         style={{
