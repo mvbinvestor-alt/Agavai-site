@@ -155,7 +155,7 @@ export default function CheckoutForm({
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
               {WHATSAPP_NUMBER && (
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -166,12 +166,12 @@ export default function CheckoutForm({
                   className="btn"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ alignSelf: 'flex-start' }}
                 >
                   Complete Order on WhatsApp
                 </a>
               )}
               <InstagramDmButton
+                label="Complete Order on Instagram DM"
                 message={`Hi Agavai! I'd like to order: ${items
                   .map((i) => `${i.name} x${i.quantity}`)
                   .join(', ')}. Subtotal ₹${subtotal.toLocaleString('en-IN')} — please confirm shipping and total.`}
@@ -208,7 +208,7 @@ export default function CheckoutForm({
                   International shipping is available for {unshippableItems.map((i) => i.name).join(', ')} —
                   the cost just varies by destination, so we'll need to send you a quote before you can pay.
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                   {WHATSAPP_NUMBER && (
                     <a
                       href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -219,12 +219,12 @@ export default function CheckoutForm({
                       className="btn btn-outline"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ alignSelf: 'flex-start' }}
                     >
                       Get a Quote on WhatsApp
                     </a>
                   )}
                   <InstagramDmButton
+                    label="Get a Quote on Instagram"
                     message={`Hi Agavai! I'd like a shipping quote for: ${unshippableItems
                       .map((i) => `${i.name} x${i.quantity}`)
                       .join(', ')} to ${form.city || 'my location'}, ${country}.`}

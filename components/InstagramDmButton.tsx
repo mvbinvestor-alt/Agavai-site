@@ -3,56 +3,40 @@
 import { useState } from 'react';
 import { instagramDmLink } from '@/lib/instagram';
 
-// Instagram's DM link has no "prefilled text" option the way wa.me does, and
-// a customer who doesn't realize they need to manually paste the message
-// just sees an empty chat and gives up. So instead of one button that copies
-// and opens at once, this shows the message as visible, persistent text with
-// two explicit steps — copy, then open and paste — so the instruction is
-// still there even after they've switched over to the Instagram app.
-export default function InstagramDmButton({ message }: { message: string }) {
+// Instagram's DM link has no "prefilled text" option the way wa.me does, so
+// we copy the message to the clipboard right before opening the DM. The
+// small caption below the button is permanent (not a timed toast) so the
+// "paste it" instruction is still visible even after switching to Instagram
+// and coming back, instead of only showing while the tab is in focus.
+export default function InstagramDmButton({
+  message,
+  label,
+  className = 'btn btn-outline',
+}: {
+  message: string;
+  label: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
-  async function handleCopy() {
+  async function handleClick() {
     try {
       await navigator.clipboard.writeText(message);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Clipboard API unavailable — the text is already visible below to select and copy manually.
+      // Clipboard API unavailable — Instagram still opens, they'll just need to type it.
     }
+    window.open(instagramDmLink(), '_blank', 'noopener,noreferrer');
   }
 
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: 6, padding: '12px 14px' }}>
-      <p style={{ fontSize: 13, color: 'var(--ink-soft)', marginBottom: 8, marginTop: 0 }}>
-        Instagram doesn&apos;t let us fill this in for you — copy it below, then paste it into the chat
-        once it opens.
-      </p>
-      <textarea
-        readOnly
-        value={message}
-        rows={3}
-        onFocus={(e) => e.target.select()}
-        style={{
-          width: '100%',
-          fontSize: 13,
-          padding: '8px 10px',
-          border: '1px solid var(--line)',
-          borderRadius: 4,
-          fontFamily: 'inherit',
-          marginBottom: 10,
-          resize: 'none',
-          background: '#fff',
-        }}
-      />
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <button type="button" className="btn btn-outline" onClick={handleCopy}>
-          {copied ? '1. Copied ✓' : '1. Copy message'}
-        </button>
-        <a href={instagramDmLink()} target="_blank" rel="noopener noreferrer" className="btn">
-          2. Open Instagram &amp; paste
-        </a>
-      </div>
+    <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+      <button type="button" onClick={handleClick} className={className}>
+        {copied ? 'Copied — paste it in Instagram ✓' : label}
+      </button>
+      <span style={{ fontSize: 11, color: 'var(--ink-soft)' }}>
+        Tap, then paste into the chat that opens
+      </span>
     </div>
   );
 }
