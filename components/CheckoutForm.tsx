@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import { instagramDmLink } from '@/lib/instagram';
+import InstagramDmButton from '@/components/InstagramDmButton';
 import { PhoneInput, toValidatedPhone } from '@/components/PhoneInput';
 
 export default function CheckoutForm({
@@ -169,14 +170,12 @@ export default function CheckoutForm({
                   Complete Order on WhatsApp
                 </a>
               )}
-              <a
-                href={instagramDmLink()}
-                className="btn btn-outline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Complete Order on Instagram DM
-              </a>
+              <InstagramDmButton
+                label="Complete Order on Instagram DM"
+                message={`Hi Agavai! I'd like to order: ${items
+                  .map((i) => `${i.name} x${i.quantity}`)
+                  .join(', ')}. Subtotal ₹${subtotal.toLocaleString('en-IN')} — please confirm shipping and total.`}
+              />
             </div>
           </div>
         ) : (
@@ -224,14 +223,12 @@ export default function CheckoutForm({
                       Get a Quote on WhatsApp
                     </a>
                   )}
-                  <a
-                    href={instagramDmLink()}
-                    className="btn btn-outline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Get a Quote on Instagram
-                  </a>
+                  <InstagramDmButton
+                    label="Get a Quote on Instagram"
+                    message={`Hi Agavai! I'd like a shipping quote for: ${unshippableItems
+                      .map((i) => `${i.name} x${i.quantity}`)
+                      .join(', ')} to ${form.city || 'my location'}, ${country}.`}
+                  />
                 </div>
               </div>
             )}
