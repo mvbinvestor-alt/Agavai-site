@@ -26,14 +26,32 @@ export default function GlobalSaleToggle({
 
   async function toggle() {
     const next = !enabled;
-    if (next && !(Number(percent) > 0 && Number(percent) < 100)) {
-      setError('Enter a discount percent between 1 and 99 first.');
+
+    if (next) {
+      // Turning on: save the percent AND the on/off flag together, so a
+      // single tap always leaves both in sync — no separate "Save percent"
+      // step required just to turn the sale on.
+      const n = Number(percent);
+      if (!(n > 0 && n < 100)) {
+        setError('Enter a discount percent between 1 and 99 first.');
+        return;
+      }
+      setError('');
+      setSavingToggle(true);
+      const results = await Promise.all([
+        saveSetting('global_sale_percent', String(n)),
+        saveSetting('global_sale_enabled', 'true'),
+      ]);
+      if (results.every((r) => r.ok)) setEnabled(true);
+      else setError('Could not save — please try again.');
+      setSavingToggle(false);
       return;
     }
+
     setError('');
     setSavingToggle(true);
-    const res = await saveSetting('global_sale_enabled', next ? 'true' : 'false');
-    if (res.ok) setEnabled(next);
+    const res = await saveSetting('global_sale_enabled', 'false');
+    if (res.ok) setEnabled(false);
     setSavingToggle(false);
   }
 
