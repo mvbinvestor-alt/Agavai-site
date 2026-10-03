@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import { instagramDmLink, instagramProfileLink } from '@/lib/instagram';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
@@ -11,6 +12,7 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <>
+      <SaleBanner />
       <Header />
       <section className="hero" style={{ paddingBottom: 20 }}>
         <div className="wrap">

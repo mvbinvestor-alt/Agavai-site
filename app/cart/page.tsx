@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
@@ -12,6 +13,7 @@ export default function CartPage() {
 
   return (
     <>
+      <SaleBanner />
       <Header />
       <div className="wrap" style={{ padding: '40px 20px', maxWidth: 720 }}>
         <h1 className="font-display" style={{ fontSize: 28, marginBottom: 20 }}>

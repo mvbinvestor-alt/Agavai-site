@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import CatalogGrid from '@/components/CatalogGrid';
 import CatalogNotice from '@/components/CatalogNotice';
@@ -47,6 +48,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <SaleBanner />
       <Header />
       <section className="hero">
         <div className="wrap">

@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import type { Product } from '@/lib/types';
+import { isOnSale, getEffectivePrice } from '@/lib/pricing';
 
 export default function ProductCard({ product }: { product: Product }) {
   const cover = product.media[0];
   const isSold = !product.is_available;
   const isOutOfStock = !isSold && product.quantity <= 0;
+  const onSale = isOnSale(product);
+  const effectivePrice = getEffectivePrice(product);
 
   return (
     <Link href={`/product/${product.id}`} className="product-card">
@@ -31,6 +34,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         <span className="product-card__badge">{product.category}</span>
+        {onSale && !isSold && <span className="sale-badge sale-badge--card">Sale</span>}
         {isSold && <div className="product-card__sold">Sold</div>}
         {isOutOfStock && (
           <div className="product-card__sold">
@@ -45,8 +49,15 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="product-card__meta">
         <h3 className="product-card__name">{product.name}</h3>
         {product.sku && <div className="product-card__sku">ID: {product.sku}</div>}
-        {product.price != null && (
-          <div className="product-card__price">₹{Number(product.price).toLocaleString('en-IN')}</div>
+        {effectivePrice != null && (
+          <div className="product-card__price">
+            {onSale && (
+              <span className="price-original">₹{Number(product.price).toLocaleString('en-IN')}</span>
+            )}
+            <span className={onSale ? 'price-sale' : undefined}>
+              ₹{Number(effectivePrice).toLocaleString('en-IN')}
+            </span>
+          </div>
         )}
       </div>
     </Link>

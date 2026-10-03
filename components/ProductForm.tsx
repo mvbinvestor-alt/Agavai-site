@@ -24,6 +24,8 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [origin, setOrigin] = useState(product?.origin || '');
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
   const [price, setPrice] = useState(product?.price != null ? String(product.price) : '');
+  const [onSale, setOnSale] = useState(product?.sale_price != null);
+  const [salePrice, setSalePrice] = useState(product?.sale_price != null ? String(product.sale_price) : '');
   const [quantity, setQuantity] = useState(product?.quantity != null ? String(product.quantity) : '1');
   const [description, setDescription] = useState(product?.description || '');
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
@@ -100,6 +102,22 @@ export default function ProductForm({ product }: { product?: Product }) {
       setError('Please wait for uploads to finish.');
       return;
     }
+    if (onSale) {
+      const p = Number(price);
+      const sp = Number(salePrice);
+      if (price === '' || !(p > 0)) {
+        setError('Set a regular price before putting this product on sale.');
+        return;
+      }
+      if (salePrice === '' || !(sp > 0)) {
+        setError('Enter an offer price, or turn off "On sale".');
+        return;
+      }
+      if (sp >= p) {
+        setError('Offer price must be lower than the regular price.');
+        return;
+      }
+    }
 
     setSaving(true);
     const payload = {
@@ -111,6 +129,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       origin: origin.trim() || null,
       is_featured: isFeatured,
       price: price === '' ? null : Number(price),
+      sale_price: onSale && salePrice !== '' ? Number(salePrice) : null,
       quantity: quantity === '' ? 1 : Math.max(0, Number(quantity)),
       description: description.trim(),
       is_available: isAvailable,
@@ -222,6 +241,52 @@ export default function ProductForm({ product }: { product?: Product }) {
           onChange={(e) => setPrice(e.target.value)}
         />
       </div>
+
+      <div className="field">
+        <label>
+          <input
+            type="checkbox"
+            checked={onSale}
+            onChange={(e) => setOnSale(e.target.checked)}
+            style={{ marginRight: 8 }}
+          />
+          On sale
+        </label>
+      </div>
+
+      {onSale && (
+        <div className="field">
+          <label htmlFor="salePrice">Offer price (₹) — shown struck-through next to the regular price</label>
+          <input
+            id="salePrice"
+            type="number"
+            min="0"
+            value={salePrice}
+            onChange={(e) => setSalePrice(e.target.value)}
+          />
+          {price !== '' && salePrice !== '' && Number(salePrice) > 0 && Number(salePrice) < Number(price) && (
+            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ink-soft)' }}>
+              Customers will see:{' '}
+              <span style={{ textDecoration: 'line-through', marginRight: 6 }}>
+                ₹{Number(price).toLocaleString('en-IN')}
+              </span>
+              <strong style={{ color: 'var(--clay)' }}>₹{Number(salePrice).toLocaleString('en-IN')}</strong>{' '}
+              <span
+                style={{
+                  background: 'var(--clay)',
+                  color: '#fff',
+                  fontSize: 11,
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  marginLeft: 4,
+                }}
+              >
+                {Math.round((1 - Number(salePrice) / Number(price)) * 100)}% OFF
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="quantity">Quantity in stock</label>

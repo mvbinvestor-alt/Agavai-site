@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
@@ -11,6 +12,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <>
+      <SaleBanner />
       <Header />
 
       <section className="hero" style={{ paddingBottom: 20 }}>

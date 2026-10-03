@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/types';
+import { isOnSale } from '@/lib/pricing';
 
 export default function AdminProductList({ products }: { products: Product[] }) {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function AdminProductList({ products }: { products: Product[] }) 
               {p.sku ? `${p.sku} · ` : ''}
               {p.category}
               {p.price != null ? ` · ₹${Number(p.price).toLocaleString('en-IN')}` : ''}
+              {isOnSale(p) ? ` → ₹${Number(p.sale_price).toLocaleString('en-IN')} (sale)` : ''}
               {` · Qty: ${p.quantity}`}
               {!p.is_available ? ' · Sold' : ''}
             </span>

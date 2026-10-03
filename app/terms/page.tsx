@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 
 export const metadata = {
@@ -9,6 +10,7 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <>
+      <SaleBanner />
       <Header />
       <section className="hero" style={{ paddingBottom: 20 }}>
         <div className="wrap">

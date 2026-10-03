@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import AddToCartButton from '@/components/AddToCartButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
+import { isOnSale, getEffectivePrice, getDiscountPercent } from '@/lib/pricing';
 
 export const revalidate = 0;
 
@@ -48,6 +50,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const product = await getProduct(id);
   if (!product) notFound();
 
+  const onSale = isOnSale(product);
+  const effectivePrice = getEffectivePrice(product);
+  const discountPercent = getDiscountPercent(product);
+
   const headersList = await headers();
   const host = headersList.get('host');
   const protocol = host?.includes('localhost') ? 'http' : 'https';
@@ -64,12 +70,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     image: product.media.map((m) => m.url),
     brand: { '@type': 'Brand', name: 'Agavai' },
   };
-  if (product.price != null) {
+  if (effectivePrice != null) {
     jsonLd.offers = {
       '@type': 'Offer',
       url: productUrl,
       priceCurrency: 'INR',
-      price: product.price,
+      price: effectivePrice,
       availability:
         product.is_available && product.quantity > 0
           ? 'https://schema.org/InStock'
@@ -86,6 +92,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString }}
       />
+      <SaleBanner />
       <Header />
       <div className="wrap">
         <div className="product-detail">
@@ -96,8 +103,22 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <div className="pd-cat">{product.category}</div>
             <h1 className="pd-name">{product.name}</h1>
             {product.sku && <div className="pd-sku">Product ID: {product.sku}</div>}
-            {product.price != null && (
-              <div className="pd-price">₹{Number(product.price).toLocaleString('en-IN')}</div>
+            {effectivePrice != null && (
+              <div className="pd-price">
+                {onSale && (
+                  <span className="price-original" style={{ fontSize: '0.7em', marginRight: 10 }}>
+                    ₹{Number(product.price).toLocaleString('en-IN')}
+                  </span>
+                )}
+                <span className={onSale ? 'price-sale' : undefined}>
+                  ₹{Number(effectivePrice).toLocaleString('en-IN')}
+                </span>
+                {onSale && discountPercent != null && (
+                  <span className="sale-badge" style={{ marginLeft: 10, verticalAlign: 'middle' }}>
+                    {discountPercent}% OFF
+                  </span>
+                )}
+              </div>
             )}
 
             {product.description && <p className="pd-desc">{product.description}</p>}
@@ -125,12 +146,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               </dl>
             )}
 
-            {product.is_available && product.quantity > 0 && product.price != null ? (
+            {product.is_available && product.quantity > 0 && effectivePrice != null ? (
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                 <AddToCartButton
                   productId={product.id}
                   name={product.name}
-                  price={product.price}
+                  price={effectivePrice}
                   image={product.media[0]?.url || null}
                   maxQuantity={product.quantity}
                   shippingDomestic={product.shipping_price_domestic}

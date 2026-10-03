@@ -18,6 +18,7 @@ export interface Product {
   origin: string | null;
   is_featured: boolean;
   price: number | null;
+  sale_price: number | null;
   quantity: number;
   description: string | null;
   is_available: boolean;

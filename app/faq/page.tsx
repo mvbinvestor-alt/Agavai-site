@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import { instagramDmLink } from '@/lib/instagram';
@@ -66,6 +67,7 @@ export default function FaqPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <SaleBanner />
       <Header />
       <section className="hero" style={{ paddingBottom: 20 }}>
         <div className="wrap">

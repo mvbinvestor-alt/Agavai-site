@@ -5,6 +5,7 @@ import AdminLogin from '@/components/AdminLogin';
 import AdminProductList from '@/components/AdminProductList';
 import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
 import CheckoutPausedToggle from '@/components/CheckoutPausedToggle';
+import SaleBannerToggle from '@/components/SaleBannerToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
 import { getSettings } from '@/lib/settings';
@@ -36,6 +37,10 @@ export default async function AdminPage() {
     'catalog_notice_text',
     'checkout_paused',
     'checkout_paused_message',
+    'sale_banner_enabled',
+    'sale_banner_message',
+    'sale_banner_start',
+    'sale_banner_end',
   ]);
   const noticeEnabled = settings.catalog_notice_enabled !== 'false';
   const noticeText =
@@ -44,10 +49,20 @@ export default async function AdminPage() {
   const checkoutPausedMessage =
     settings.checkout_paused_message ||
     "We're confirming orders manually right now while we fine-tune shipping — message us on WhatsApp or Instagram with what you'd like, and we'll help you complete your order and payment there.";
+  const saleBannerEnabled = settings.sale_banner_enabled === 'true';
+  const saleBannerMessage = settings.sale_banner_message || '';
+  const saleBannerStart = settings.sale_banner_start || '';
+  const saleBannerEnd = settings.sale_banner_end || '';
 
   return (
     <div className="admin-shell">
       <CheckoutPausedToggle initialPaused={checkoutPaused} initialMessage={checkoutPausedMessage} />
+      <SaleBannerToggle
+        initialEnabled={saleBannerEnabled}
+        initialMessage={saleBannerMessage}
+        initialStart={saleBannerStart}
+        initialEnd={saleBannerEnd}
+      />
       <CatalogNoticeToggle initialEnabled={noticeEnabled} initialText={noticeText} />
       <div
         style={{

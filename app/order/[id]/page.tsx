@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
+import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import { supabaseAdmin } from '@/lib/supabase';
 import { buildUpiLink, isUpiConfigured, getUpiId, getUpiPayeeName } from '@/lib/upi';
@@ -23,6 +24,7 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ id
 
   return (
     <>
+      <SaleBanner />
       <Header />
       <div className="wrap" style={{ padding: '60px 20px', maxWidth: 560 }}>
         {!order ? (
