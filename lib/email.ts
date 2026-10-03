@@ -1,23 +1,38 @@
-// Email via Resend (resend.com). Optional — if RESEND_API_KEY isn't set,
-// order-status emails are silently skipped so nothing breaks before it's
-// configured. To enable: sign up at resend.com, verify a sending domain (or
-// use their onboarding@resend.dev for testing), add RESEND_API_KEY and
-// RESEND_FROM_EMAIL to your env vars.
+// Email via Gmail SMTP (your own Gmail account + an "app password" — no
+// domain verification or DNS records needed). Optional — if GMAIL_USER /
+// GMAIL_APP_PASSWORD aren't set, order-status emails are silently skipped
+// so nothing breaks before it's configured. To enable:
+// 1. Turn on 2-Step Verification on the Gmail account you want to send from.
+// 2. Create an "app password" at https://myaccount.google.com/apppasswords
+// 3. Add GMAIL_USER (the full gmail address) and GMAIL_APP_PASSWORD (the
+//    16-character app password, no spaces) to your env vars.
 
+import nodemailer from 'nodemailer';
 import type { Order, OrderItem } from './types';
 
 type EmailKind = 'confirmed' | 'packed' | 'shipped' | 'delivered';
 
 function isConfigured() {
-  return !!process.env.RESEND_API_KEY;
+  return !!process.env.GMAIL_USER && !!process.env.GMAIL_APP_PASSWORD;
 }
 
-function fromAddress() {
-  return process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+let cachedTransporter: ReturnType<typeof nodemailer.createTransport> | null = null;
+
+function getTransporter() {
+  if (!cachedTransporter) {
+    cachedTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+  }
+  return cachedTransporter;
 }
 
 // Low-level send, shared by order-status emails and the weekly report.
-async function sendViaResend({
+async function sendViaGmail({
   to,
   subject,
   text,
@@ -28,30 +43,15 @@ async function sendViaResend({
   text: string;
   html?: string;
 }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error('RESEND_API_KEY is not set');
+  if (!isConfigured()) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD are not set');
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: `Agavai <${fromAddress()}>`,
-      to,
-      subject,
-      text,
-      ...(html ? { html } : {}),
-    }),
+  await getTransporter().sendMail({
+    from: `Agavai <${process.env.GMAIL_USER}>`,
+    to: Array.isArray(to) ? to.join(', ') : to,
+    subject,
+    text,
+    ...(html ? { html } : {}),
   });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Resend API error ${res.status}: ${body.slice(0, 300)}`);
-  }
-
-  return res.json();
 }
 
 const SUBJECTS: Record<EmailKind, string> = {
@@ -96,7 +96,7 @@ export async function sendOrderEmail(
   order: Order & { items: OrderItem[] }
 ): Promise<void> {
   if (!isConfigured()) return;
-  await sendViaResend({ to, subject: SUBJECTS[kind], text: buildBody(kind, order) }).catch(() => {
+  await sendViaGmail({ to, subject: SUBJECTS[kind], text: buildBody(kind, order) }).catch(() => {
     // Order emails are a nice-to-have, never block order processing on an email failure.
   });
 }
@@ -125,7 +125,7 @@ export async function sendReportEmail({
   html: string;
   text: string;
 }) {
-  if (!isConfigured()) throw new Error('Email is not configured (RESEND_API_KEY missing)');
+  if (!isConfigured()) throw new Error('Email is not configured (GMAIL_USER / GMAIL_APP_PASSWORD missing)');
   if (to.length === 0) throw new Error('No recipients configured (REPORT_RECIPIENTS)');
-  return sendViaResend({ to, subject, text, html });
+  return sendViaGmail({ to, subject, text, html });
 }

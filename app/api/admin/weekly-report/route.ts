@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isReportEmailConfigured()) {
-    return NextResponse.json({ error: 'Email is not configured yet (RESEND_API_KEY)' }, { status: 503 });
+    return NextResponse.json({ error: 'Email is not configured yet (GMAIL_USER / GMAIL_APP_PASSWORD)' }, { status: 503 });
   }
 
   const recipients = getReportRecipients();
