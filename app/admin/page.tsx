@@ -6,9 +6,10 @@ import AdminProductList from '@/components/AdminProductList';
 import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
 import CheckoutPausedToggle from '@/components/CheckoutPausedToggle';
 import SaleBannerToggle from '@/components/SaleBannerToggle';
+import GlobalSaleToggle from '@/components/GlobalSaleToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
-import { getSettings } from '@/lib/settings';
+import { getSettings, getGlobalDiscountPercent } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -31,16 +32,21 @@ export default async function AdminPage() {
     return <AdminLogin />;
   }
 
-  const products = await getAllProducts();
-  const settings = await getSettings([
-    'catalog_notice_enabled',
-    'catalog_notice_text',
-    'checkout_paused',
-    'checkout_paused_message',
-    'sale_banner_enabled',
-    'sale_banner_message',
-    'sale_banner_start',
-    'sale_banner_end',
+  const [products, settings, globalDiscountPercent] = await Promise.all([
+    getAllProducts(),
+    getSettings([
+      'catalog_notice_enabled',
+      'catalog_notice_text',
+      'checkout_paused',
+      'checkout_paused_message',
+      'sale_banner_enabled',
+      'sale_banner_message',
+      'sale_banner_start',
+      'sale_banner_end',
+      'global_sale_enabled',
+      'global_sale_percent',
+    ]),
+    getGlobalDiscountPercent(),
   ]);
   const noticeEnabled = settings.catalog_notice_enabled !== 'false';
   const noticeText =
@@ -53,6 +59,8 @@ export default async function AdminPage() {
   const saleBannerMessage = settings.sale_banner_message || '';
   const saleBannerStart = settings.sale_banner_start || '';
   const saleBannerEnd = settings.sale_banner_end || '';
+  const globalSaleEnabled = settings.global_sale_enabled === 'true';
+  const globalSalePercent = settings.global_sale_percent || '10';
 
   return (
     <div className="admin-shell">
@@ -63,6 +71,7 @@ export default async function AdminPage() {
         initialStart={saleBannerStart}
         initialEnd={saleBannerEnd}
       />
+      <GlobalSaleToggle initialEnabled={globalSaleEnabled} initialPercent={globalSalePercent} />
       <CatalogNoticeToggle initialEnabled={noticeEnabled} initialText={noticeText} />
       <div
         style={{
@@ -88,7 +97,7 @@ export default async function AdminPage() {
 
       <InventoryTools />
 
-      <AdminProductList products={products} />
+      <AdminProductList products={products} globalDiscountPercent={globalDiscountPercent} />
 
       <div style={{ marginTop: 30 }}>
         <a href="/" style={{ fontSize: 13, marginRight: 16 }}>

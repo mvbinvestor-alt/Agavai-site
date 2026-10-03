@@ -2,12 +2,18 @@ import Link from 'next/link';
 import type { Product } from '@/lib/types';
 import { isOnSale, getEffectivePrice } from '@/lib/pricing';
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  globalDiscountPercent = null,
+}: {
+  product: Product;
+  globalDiscountPercent?: number | null;
+}) {
   const cover = product.media[0];
   const isSold = !product.is_available;
   const isOutOfStock = !isSold && product.quantity <= 0;
-  const onSale = isOnSale(product);
-  const effectivePrice = getEffectivePrice(product);
+  const onSale = isOnSale(product, globalDiscountPercent);
+  const effectivePrice = getEffectivePrice(product, globalDiscountPercent);
 
   return (
     <Link href={`/product/${product.id}`} className="product-card">

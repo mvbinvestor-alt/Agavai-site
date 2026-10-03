@@ -2,7 +2,13 @@ import Link from 'next/link';
 import ProductCard from './ProductCard';
 import type { Product } from '@/lib/types';
 
-export default function PokkishamStrip({ products }: { products: Product[] }) {
+export default function PokkishamStrip({
+  products,
+  globalDiscountPercent = null,
+}: {
+  products: Product[];
+  globalDiscountPercent?: number | null;
+}) {
   const pokkisham = products.filter((p) => p.category.trim().toLowerCase() === 'agavai pokkisham');
 
   if (pokkisham.length === 0) return null;
@@ -27,7 +33,7 @@ export default function PokkishamStrip({ products }: { products: Product[] }) {
         <div className="pokkisham-strip__row">
           {pokkisham.map((p) => (
             <div className="pokkisham-strip__item" key={p.id}>
-              <ProductCard product={p} />
+              <ProductCard product={p} globalDiscountPercent={globalDiscountPercent} />
             </div>
           ))}
         </div>

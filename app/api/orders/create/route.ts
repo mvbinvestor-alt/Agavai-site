@@ -3,7 +3,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createPaymentLink, isRazorpayConfigured } from '@/lib/razorpay';
 import { isUpiConfigured } from '@/lib/upi';
-import { getSetting } from '@/lib/settings';
+import { getSetting, getGlobalDiscountPercent } from '@/lib/settings';
 import { getEffectivePrice } from '@/lib/pricing';
 
 export const runtime = 'nodejs';
@@ -33,7 +33,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const checkoutPaused = (await getSetting('checkout_paused')) === 'true';
+  const [checkoutPaused, globalDiscountPercent] = await Promise.all([
+    getSetting('checkout_paused').then((v) => v === 'true'),
+    getGlobalDiscountPercent(),
+  ]);
   if (checkoutPaused) {
     return NextResponse.json(
       {
@@ -115,7 +118,7 @@ export async function POST(req: NextRequest) {
       );
     }
     // Charge the sale price when one is actively set, never a price sent by the client.
-    const effectivePrice = getEffectivePrice(product) as number;
+    const effectivePrice = getEffectivePrice(product, globalDiscountPercent) as number;
     subtotal += effectivePrice * line.quantity;
     shippingFee += (isInternational ? product.shipping_price_international : product.shipping_price_domestic || 0) * line.quantity;
     lineItems.push({

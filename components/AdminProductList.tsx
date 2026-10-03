@@ -3,9 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/types';
-import { isOnSale } from '@/lib/pricing';
+import { isOnSale, getEffectivePrice } from '@/lib/pricing';
 
-export default function AdminProductList({ products }: { products: Product[] }) {
+export default function AdminProductList({
+  products,
+  globalDiscountPercent = null,
+}: {
+  products: Product[];
+  globalDiscountPercent?: number | null;
+}) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -43,7 +49,9 @@ export default function AdminProductList({ products }: { products: Product[] }) 
               {p.sku ? `${p.sku} · ` : ''}
               {p.category}
               {p.price != null ? ` · ₹${Number(p.price).toLocaleString('en-IN')}` : ''}
-              {isOnSale(p) ? ` → ₹${Number(p.sale_price).toLocaleString('en-IN')} (sale)` : ''}
+              {isOnSale(p, globalDiscountPercent)
+                ? ` → ₹${Number(getEffectivePrice(p, globalDiscountPercent)).toLocaleString('en-IN')} (sale)`
+                : ''}
               {` · Qty: ${p.quantity}`}
               {!p.is_available ? ' · Sold' : ''}
             </span>

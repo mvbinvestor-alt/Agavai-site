@@ -1,7 +1,13 @@
 import ProductCard from './ProductCard';
 import type { Product } from '@/lib/types';
 
-export default function FeaturedProducts({ products }: { products: Product[] }) {
+export default function FeaturedProducts({
+  products,
+  globalDiscountPercent = null,
+}: {
+  products: Product[];
+  globalDiscountPercent?: number | null;
+}) {
   const featured = products.filter((p) => p.is_featured);
 
   if (featured.length === 0) return null;
@@ -15,7 +21,7 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
         <div className="featured-strip__row">
           {featured.map((p) => (
             <div className="featured-strip__item" key={p.id}>
-              <ProductCard product={p} />
+              <ProductCard product={p} globalDiscountPercent={globalDiscountPercent} />
             </div>
           ))}
         </div>

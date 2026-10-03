@@ -4,7 +4,13 @@ import { useMemo, useState } from 'react';
 import ProductCard from './ProductCard';
 import type { Product } from '@/lib/types';
 
-export default function CatalogGrid({ products }: { products: Product[] }) {
+export default function CatalogGrid({
+  products,
+  globalDiscountPercent = null,
+}: {
+  products: Product[];
+  globalDiscountPercent?: number | null;
+}) {
   const categories = useMemo(() => {
     const set = new Set(products.map((p) => p.category));
     return ['All', ...Array.from(set)];
@@ -40,7 +46,7 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
         ) : (
           <div className="shelf-grid">
             {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} globalDiscountPercent={globalDiscountPercent} />
             ))}
           </div>
         )}

@@ -9,6 +9,7 @@ import WhyChooseAgavai from '@/components/WhyChooseAgavai';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { instagramProfileLink } from '@/lib/instagram';
 import { supabasePublic } from '@/lib/supabase';
+import { getGlobalDiscountPercent } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -29,7 +30,10 @@ async function getProducts(): Promise<Product[]> {
 }
 
 export default async function HomePage() {
-  const products = await getProducts();
+  const [products, globalDiscountPercent] = await Promise.all([
+    getProducts(),
+    getGlobalDiscountPercent(),
+  ]);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -68,10 +72,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <FeaturedProducts products={products} />
-      <PokkishamStrip products={products} />
+      <FeaturedProducts products={products} globalDiscountPercent={globalDiscountPercent} />
+      <PokkishamStrip products={products} globalDiscountPercent={globalDiscountPercent} />
       <CatalogNotice />
-      <CatalogGrid products={products} />
+      <CatalogGrid products={products} globalDiscountPercent={globalDiscountPercent} />
       <WhyChooseAgavai />
       <Footer />
     </>

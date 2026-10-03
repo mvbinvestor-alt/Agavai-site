@@ -7,6 +7,7 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import AddToCartButton from '@/components/AddToCartButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
+import { getGlobalDiscountPercent } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 import { isOnSale, getEffectivePrice, getDiscountPercent } from '@/lib/pricing';
 
@@ -47,12 +48,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await getProduct(id);
+  const [product, globalDiscountPercent] = await Promise.all([
+    getProduct(id),
+    getGlobalDiscountPercent(),
+  ]);
   if (!product) notFound();
 
-  const onSale = isOnSale(product);
-  const effectivePrice = getEffectivePrice(product);
-  const discountPercent = getDiscountPercent(product);
+  const onSale = isOnSale(product, globalDiscountPercent);
+  const effectivePrice = getEffectivePrice(product, globalDiscountPercent);
+  const discountPercent = getDiscountPercent(product, globalDiscountPercent);
 
   const headersList = await headers();
   const host = headersList.get('host');
