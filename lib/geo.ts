@@ -6,9 +6,11 @@ function hashIp(ip: string): string {
 }
 
 // Resolves an IP to a country, using a cache so the same visitor never
-// triggers a second API call. Free tier of ipapi.co: ~30,000 lookups/month,
-// no API key needed. Returns a diagnostic string instead of null on failure,
-// so failures are visible in the admin dashboard instead of just "Unknown".
+// triggers a second API call. Uses freeipapi.com (free, no API key, ~60
+// lookups/minute) — switched from ipapi.co, whose free tier dropped to
+// 1,000/day and was returning 429 for nearly all lookups on this host.
+// Returns a diagnostic string instead of null on failure, so failures are
+// visible in the admin dashboard instead of just "Unknown".
 export async function getCountryForIp(ip: string | null): Promise<string> {
   if (!ip) return 'Unknown (no IP detected)';
   if (ip === '127.0.0.1' || ip === '::1') return 'Unknown (internal request)';
@@ -25,15 +27,16 @@ export async function getCountryForIp(ip: string | null): Promise<string> {
   if (cached?.country) return cached.country;
 
   try {
-    const res = await fetch(`https://ipapi.co/${ip}/country_name/`, {
+    const res = await fetch(`https://free.freeipapi.com/api/v1/json/${ip}`, {
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) {
       return `Unknown (lookup HTTP ${res.status})`;
     }
-    const text = (await res.text()).trim();
-    const looksValid = text && text.length < 60 && !text.toLowerCase().includes('error') && !/^\d+$/.test(text);
-    const country = looksValid ? text : `Unknown (bad response: ${text.slice(0, 30)})`;
+    const data = await res.json();
+    const text = (data?.countryName || '').trim();
+    const looksValid = text && text.length < 60 && !/^\d+$/.test(text);
+    const country = looksValid ? text : `Unknown (bad response)`;
 
     if (looksValid) {
       await admin.from('ip_country_cache').insert({ ip_hash: hash, country });
