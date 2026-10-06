@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import type { ProductMedia } from '@/lib/types';
+import Lightbox from './Lightbox';
 
 export default function Gallery({ media, name }: { media: ProductMedia[]; name: string }) {
   const [active, setActive] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const current = media[active];
 
   return (
@@ -14,8 +16,15 @@ export default function Gallery({ media, name }: { media: ProductMedia[]; name: 
           current.type === 'video' ? (
             <video src={current.url} controls playsInline />
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={current.url} alt={name} />
+            <button
+              type="button"
+              className="pd-gallery__zoom"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="View full-size photo"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={current.url} alt={name} />
+            </button>
           )
         ) : (
           <div
@@ -45,6 +54,18 @@ export default function Gallery({ media, name }: { media: ProductMedia[]; name: 
             </button>
           ))}
         </div>
+      )}
+
+      {lightboxOpen && (
+        <Lightbox
+          media={media}
+          initialIndex={active}
+          name={name}
+          onClose={(lastIndex) => {
+            setActive(lastIndex);
+            setLightboxOpen(false);
+          }}
+        />
       )}
     </div>
   );
