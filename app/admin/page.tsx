@@ -9,7 +9,7 @@ import SaleBannerToggle from '@/components/SaleBannerToggle';
 import GlobalSaleToggle from '@/components/GlobalSaleToggle';
 import InventoryTools from '@/components/InventoryTools';
 import LogoutButton from '@/components/LogoutButton';
-import { getSettings, getGlobalDiscountPercent } from '@/lib/settings';
+import { getSettings, resolveGlobalDiscountPercent } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -32,7 +32,7 @@ export default async function AdminPage() {
     return <AdminLogin />;
   }
 
-  const [products, settings, globalDiscountPercent] = await Promise.all([
+  const [products, settings] = await Promise.all([
     getAllProducts(),
     getSettings([
       'catalog_notice_enabled',
@@ -46,8 +46,8 @@ export default async function AdminPage() {
       'global_sale_enabled',
       'global_sale_percent',
     ]),
-    getGlobalDiscountPercent(),
   ]);
+  const globalDiscountPercent = resolveGlobalDiscountPercent(settings);
   const noticeEnabled = settings.catalog_notice_enabled !== 'false';
   const noticeText =
     settings.catalog_notice_text || "We're still adding pieces here — our full range is on Instagram.";

@@ -9,7 +9,7 @@ import WhyChooseAgavai from '@/components/WhyChooseAgavai';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { instagramProfileLink } from '@/lib/instagram';
 import { supabasePublic } from '@/lib/supabase';
-import { getGlobalDiscountPercent } from '@/lib/settings';
+import { getSettings, resolveGlobalDiscountPercent, resolveSaleBannerSettings, SALE_BANNER_KEYS } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
@@ -30,10 +30,12 @@ async function getProducts(): Promise<Product[]> {
 }
 
 export default async function HomePage() {
-  const [products, globalDiscountPercent] = await Promise.all([
+  const [products, settings] = await Promise.all([
     getProducts(),
-    getGlobalDiscountPercent(),
+    getSettings([...SALE_BANNER_KEYS, 'global_sale_enabled', 'global_sale_percent']),
   ]);
+  const globalDiscountPercent = resolveGlobalDiscountPercent(settings);
+  const bannerSettings = resolveSaleBannerSettings(settings);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -52,7 +54,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SaleBanner />
+      <SaleBanner settings={bannerSettings} />
       <Header />
       <section className="hero">
         <div className="wrap">

@@ -7,7 +7,7 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import AddToCartButton from '@/components/AddToCartButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
-import { getGlobalDiscountPercent } from '@/lib/settings';
+import { getSettings, resolveGlobalDiscountPercent, resolveSaleBannerSettings, SALE_BANNER_KEYS } from '@/lib/settings';
 import type { Product } from '@/lib/types';
 import { isOnSale, getEffectivePrice, getDiscountPercent } from '@/lib/pricing';
 
@@ -48,11 +48,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [product, globalDiscountPercent] = await Promise.all([
+  const [product, settings] = await Promise.all([
     getProduct(id),
-    getGlobalDiscountPercent(),
+    getSettings([...SALE_BANNER_KEYS, 'global_sale_enabled', 'global_sale_percent']),
   ]);
   if (!product) notFound();
+
+  const globalDiscountPercent = resolveGlobalDiscountPercent(settings);
+  const bannerSettings = resolveSaleBannerSettings(settings);
 
   const onSale = isOnSale(product, globalDiscountPercent);
   const effectivePrice = getEffectivePrice(product, globalDiscountPercent);
@@ -96,7 +99,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString }}
       />
-      <SaleBanner />
+      <SaleBanner settings={bannerSettings} />
       <Header />
       <div className="wrap">
         <div className="product-detail">

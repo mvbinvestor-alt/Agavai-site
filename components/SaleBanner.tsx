@@ -1,20 +1,21 @@
-import { getSettings } from '@/lib/settings';
+import { getSettings, resolveSaleBannerSettings, SALE_BANNER_KEYS } from '@/lib/settings';
 
-export default async function SaleBanner() {
-  const settings = await getSettings([
-    'sale_banner_enabled',
-    'sale_banner_message',
-    'sale_banner_start',
-    'sale_banner_end',
-  ]);
+type BannerSettings = ReturnType<typeof resolveSaleBannerSettings>;
 
-  if (settings.sale_banner_enabled !== 'true') return null;
+// Accepts already-fetched settings (so a page that's already loading other
+// settings in one batch can pass them straight in, with no extra round trip
+// to Supabase). Pages that have nothing else to fetch can leave `settings`
+// out and this fetches its own — same one query it always made.
+export default async function SaleBanner({ settings }: { settings?: BannerSettings } = {}) {
+  const resolved = settings ?? resolveSaleBannerSettings(await getSettings([...SALE_BANNER_KEYS]));
+
+  if (!resolved.enabled) return null;
 
   const today = new Date().toISOString().slice(0, 10);
-  if (settings.sale_banner_start && today < settings.sale_banner_start) return null;
-  if (settings.sale_banner_end && today > settings.sale_banner_end) return null;
+  if (resolved.start && today < resolved.start) return null;
+  if (resolved.end && today > resolved.end) return null;
 
-  const message = settings.sale_banner_message?.trim();
+  const message = resolved.message?.trim();
   if (!message) return null;
 
   return <div className="sale-banner">{message}</div>;
