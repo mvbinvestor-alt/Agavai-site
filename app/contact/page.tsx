@@ -71,8 +71,6 @@ export default function ContactPage() {
           Agavai
           <br />
           Tiruppur, Tamil Nadu, India
-          <br />
-          [GSTIN, if registered — to be added]
         </p>
       </section>
       <Footer />
