@@ -1137,6 +1137,12 @@ button {
   font-size: 16px;
 }
 
+.cart-row__limit-note {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  color: var(--clay);
+}
+
 .cart-summary {
   display: flex;
   justify-content: space-between;
