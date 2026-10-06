@@ -5,6 +5,7 @@ import AdminLogin from '@/components/AdminLogin';
 import AdminProductList from '@/components/AdminProductList';
 import CatalogNoticeToggle from '@/components/CatalogNoticeToggle';
 import CheckoutPausedToggle from '@/components/CheckoutPausedToggle';
+import MaintenanceModeToggle from '@/components/MaintenanceModeToggle';
 import SaleBannerToggle from '@/components/SaleBannerToggle';
 import GlobalSaleToggle from '@/components/GlobalSaleToggle';
 import InventoryTools from '@/components/InventoryTools';
@@ -45,9 +46,13 @@ export default async function AdminPage() {
       'sale_banner_end',
       'global_sale_enabled',
       'global_sale_percent',
+      'maintenance_mode',
+      'maintenance_message',
     ]),
   ]);
   const globalDiscountPercent = resolveGlobalDiscountPercent(settings);
+  const maintenanceEnabled = settings.maintenance_mode === 'true';
+  const maintenanceMessage = settings.maintenance_message || '';
   const noticeEnabled = settings.catalog_notice_enabled !== 'false';
   const noticeText =
     settings.catalog_notice_text || "We're still adding pieces here — our full range is on Instagram.";
@@ -64,6 +69,7 @@ export default async function AdminPage() {
 
   return (
     <div className="admin-shell">
+      <MaintenanceModeToggle initialEnabled={maintenanceEnabled} initialMessage={maintenanceMessage} />
       <CheckoutPausedToggle initialPaused={checkoutPaused} initialMessage={checkoutPausedMessage} />
       <SaleBannerToggle
         initialEnabled={saleBannerEnabled}
