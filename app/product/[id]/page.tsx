@@ -140,7 +140,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 )}
                 {product.dimensions && (
                   <>
-                    <dt>Dimensions</dt>
+                    <dt>Dimensions / Capacity</dt>
                     <dd>{product.dimensions}</dd>
                   </>
                 )}

@@ -198,11 +198,11 @@ export default function ProductForm({ product }: { product?: Product }) {
       </div>
 
       <div className="field">
-        <label htmlFor="dimensions">Dimensions</label>
+        <label htmlFor="dimensions">Dimensions / Capacity</label>
         <input
           id="dimensions"
           type="text"
-          placeholder="e.g. 45cm H x 20cm W x 15cm D"
+          placeholder="e.g. 45cm H x 20cm W x 15cm D — or 1.5 L capacity for vessels"
           value={dimensions}
           onChange={(e) => setDimensions(e.target.value)}
         />
