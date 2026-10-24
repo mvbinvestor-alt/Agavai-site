@@ -67,6 +67,8 @@ export async function POST(req: NextRequest) {
   const { error } = await admin.storage.from(MEDIA_BUCKET).upload(path, bytes, {
     contentType,
     upsert: false,
+    // Filenames are unique and never overwritten, so browsers/CDN may keep them for a year.
+    cacheControl: '31536000',
   });
 
   if (error) {

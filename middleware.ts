@@ -22,6 +22,8 @@ async function getMaintenanceState(): Promise<{ on: boolean; message: string }> 
       {
         headers: { apikey: key, Authorization: `Bearer ${key}` },
         cache: 'no-store',
+        // Never let a slow settings lookup hold up every page view.
+        signal: AbortSignal.timeout(2500),
       }
     );
     if (!res.ok) return { on: false, message: '' };

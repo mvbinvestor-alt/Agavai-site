@@ -1382,3 +1382,39 @@ button {
   color: var(--ink-soft);
   margin-bottom: 30px;
 }
+
+/* ---------- Video placeholders (videos aren't loaded just to draw a thumbnail) ---------- */
+
+.pd-gallery__videothumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #2a1d14;
+  color: var(--ivory);
+  font-size: 18px;
+}
+
+.product-card__videotile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  background: #2a1d14;
+  color: var(--ivory);
+}
+
+.product-card__videotile span {
+  font-size: 34px;
+}
+
+.product-card__videotile small {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}

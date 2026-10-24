@@ -7,6 +7,7 @@ import PokkishamStrip from '@/components/PokkishamStrip';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import WhyChooseAgavai from '@/components/WhyChooseAgavai';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ShopUnavailable from '@/components/ShopUnavailable';
 import { instagramProfileLink } from '@/lib/instagram';
 import { supabasePublic } from '@/lib/supabase';
 import { getSettings, resolveGlobalDiscountPercent, resolveSaleBannerSettings, SALE_BANNER_KEYS } from '@/lib/settings';
@@ -14,23 +15,30 @@ import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(): Promise<{ products: Product[]; failed: boolean }> {
   const { data, error } = await supabasePublic
     .from('products')
     .select('*, media:product_media(*)')
     .eq('is_available', true)
     .order('created_at', { ascending: false });
 
-  if (error || !data) return [];
+  // A failed lookup (e.g. database unavailable) must not look like "no products".
+  if (error || !data) {
+    console.error('Homepage product lookup failed:', error?.message);
+    return { products: [], failed: true };
+  }
 
-  return data.map((p: any) => ({
-    ...p,
-    media: (p.media || []).sort((a: any, b: any) => a.sort_order - b.sort_order),
-  }));
+  return {
+    failed: false,
+    products: data.map((p: any) => ({
+      ...p,
+      media: (p.media || []).sort((a: any, b: any) => a.sort_order - b.sort_order),
+    })),
+  };
 }
 
 export default async function HomePage() {
-  const [products, settings] = await Promise.all([
+  const [{ products, failed }, settings] = await Promise.all([
     getProducts(),
     getSettings([...SALE_BANNER_KEYS, 'global_sale_enabled', 'global_sale_percent']),
   ]);
@@ -74,10 +82,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <FeaturedProducts products={products} globalDiscountPercent={globalDiscountPercent} />
-      <PokkishamStrip products={products} globalDiscountPercent={globalDiscountPercent} />
-      <CatalogNotice />
-      <CatalogGrid products={products} globalDiscountPercent={globalDiscountPercent} />
+      {failed ? (
+        <ShopUnavailable />
+      ) : (
+        <>
+          <FeaturedProducts products={products} globalDiscountPercent={globalDiscountPercent} />
+          <PokkishamStrip products={products} globalDiscountPercent={globalDiscountPercent} />
+          <CatalogNotice />
+          <CatalogGrid products={products} globalDiscountPercent={globalDiscountPercent} />
+        </>
+      )}
       <WhyChooseAgavai />
       <Footer />
     </>

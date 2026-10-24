@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/types';
 import { isOnSale, getEffectivePrice } from '@/lib/pricing';
+import SmartImg from './SmartImg';
+import { IMG_WIDTHS } from '@/lib/imageUrl';
 
 export default function AdminProductList({
   products,
@@ -34,14 +36,15 @@ export default function AdminProductList({
       {products.map((p) => (
         <div className="admin-row" key={p.id}>
           <div className="admin-row__thumb">
-            {p.media[0] ? (
-              p.media[0].type === 'video' ? (
-                <video src={p.media[0].url} muted />
+            {(() => {
+              const cover = p.media.find((m) => m.type === 'image') ?? p.media[0];
+              if (!cover) return null;
+              return cover.type === 'video' ? (
+                <span className="pd-gallery__videothumb" aria-label="Video">▶</span>
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.media[0].url} alt="" />
-              )
-            ) : null}
+                <SmartImg src={cover.url} alt="" widths={[IMG_WIDTHS.tiny]} sizes="52px" loading="lazy" />
+              );
+            })()}
           </div>
           <div className="admin-row__info">
             <strong>{p.name}</strong>

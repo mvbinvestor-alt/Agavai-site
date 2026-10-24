@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import SaleBanner from '@/components/SaleBanner';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ShopUnavailable from '@/components/ShopUnavailable';
 import AddToCartButton from '@/components/AddToCartButton';
 import Gallery from '@/components/Gallery';
 import { supabasePublic } from '@/lib/supabase';
@@ -13,13 +14,18 @@ import { isOnSale, getEffectivePrice, getDiscountPercent } from '@/lib/pricing';
 
 export const revalidate = 0;
 
-async function getProduct(id: string): Promise<Product | null> {
+// Returns 'error' when the database couldn't be reached, so an outage is not mistaken for a missing product.
+async function getProduct(id: string): Promise<Product | null | 'error'> {
   const { data, error } = await supabasePublic
     .from('products')
     .select('*, media:product_media(*)')
     .eq('id', id)
     .single();
 
+  if (error && error.code !== 'PGRST116') {
+    console.error('Product lookup failed:', error.message);
+    return 'error';
+  }
   if (error || !data) return null;
   data.media = (data.media || []).sort((a: any, b: any) => a.sort_order - b.sort_order);
   return data as Product;
@@ -28,6 +34,7 @@ async function getProduct(id: string): Promise<Product | null> {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = await getProduct(id);
+  if (product === 'error') return { title: 'Agavai' };
   if (!product) return { title: 'Product Not Found — Agavai' };
 
   const description = product.description
@@ -52,6 +59,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     getProduct(id),
     getSettings([...SALE_BANNER_KEYS, 'global_sale_enabled', 'global_sale_percent']),
   ]);
+  if (product === 'error') {
+    return (
+      <>
+        <Header />
+        <ShopUnavailable />
+        <Footer />
+      </>
+    );
+  }
   if (!product) notFound();
 
   const globalDiscountPercent = resolveGlobalDiscountPercent(settings);

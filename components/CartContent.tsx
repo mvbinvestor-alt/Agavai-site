@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import type { CartItem } from '@/context/CartContext';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import SmartImg from './SmartImg';
+import { IMG_WIDTHS } from '@/lib/imageUrl';
 import { instagramDmLink } from '@/lib/instagram';
 
 export default function CartContent() {
@@ -48,8 +50,7 @@ export default function CartContent() {
                 <div className="cart-row">
                   <div className="cart-row__img">
                     {item.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image} alt={item.name} />
+                      <SmartImg src={item.image} alt={item.name} widths={[IMG_WIDTHS.tiny]} sizes="56px" />
                     ) : (
                       <div className="cart-row__noimg" />
                     )}

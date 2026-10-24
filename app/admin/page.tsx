@@ -15,17 +15,20 @@ import type { Product } from '@/lib/types';
 
 export const revalidate = 0;
 
-async function getAllProducts(): Promise<Product[]> {
+async function getAllProducts(): Promise<{ products: Product[]; error: string | null }> {
   const admin = supabaseAdmin();
-  const { data } = await admin
+  const { data, error } = await admin
     .from('products')
     .select('*, media:product_media(*)')
     .order('created_at', { ascending: false });
 
-  return (data || []).map((p: any) => ({
-    ...p,
-    media: (p.media || []).sort((a: any, b: any) => a.sort_order - b.sort_order),
-  }));
+  return {
+    error: error ? error.message : null,
+    products: (data || []).map((p: any) => ({
+      ...p,
+      media: (p.media || []).sort((a: any, b: any) => a.sort_order - b.sort_order),
+    })),
+  };
 }
 
 export default async function AdminPage() {
@@ -33,7 +36,7 @@ export default async function AdminPage() {
     return <AdminLogin />;
   }
 
-  const [products, settings] = await Promise.all([
+  const [{ products, error: productsError }, settings] = await Promise.all([
     getAllProducts(),
     getSettings([
       'catalog_notice_enabled',
@@ -87,7 +90,7 @@ export default async function AdminPage() {
           marginBottom: 20,
         }}
       >
-        <h2 style={{ margin: 0 }}>Products ({products.length})</h2>
+        <h2 style={{ margin: 0 }}>Products ({productsError ? '?' : products.length})</h2>
         <div style={{ display: 'flex', gap: 10 }}>
           <Link href="/admin/orders" className="btn btn-outline">
             Orders
@@ -103,7 +106,26 @@ export default async function AdminPage() {
 
       <InventoryTools />
 
-      <AdminProductList products={products} globalDiscountPercent={globalDiscountPercent} />
+      {productsError ? (
+        <div
+          role="alert"
+          style={{
+            border: '1px solid #b4492f',
+            background: '#fbe9e4',
+            color: '#6b2414',
+            borderRadius: 6,
+            padding: '14px 16px',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong>Couldn&apos;t load products from the database.</strong> Your products are not
+          deleted — the database didn&apos;t answer. Usually this means the Supabase plan limit
+          was reached (check the Supabase dashboard banner) or Supabase is having a hiccup.
+          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.85 }}>Details: {productsError}</div>
+        </div>
+      ) : (
+        <AdminProductList products={products} globalDiscountPercent={globalDiscountPercent} />
+      )}
 
       <div style={{ marginTop: 30 }}>
         <a href="/" style={{ fontSize: 13, marginRight: 16 }}>

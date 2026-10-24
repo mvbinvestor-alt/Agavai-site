@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Product, ProductMedia } from '@/lib/types';
+import SmartImg from './SmartImg';
+import { IMG_WIDTHS } from '@/lib/imageUrl';
 
 type MediaItem = {
   url: string;
@@ -395,10 +397,9 @@ export default function ProductForm({ product }: { product?: Product }) {
             {media.map((m) => (
               <div className="upload-thumb" key={m.tempId}>
                 {m.type === 'video' ? (
-                  <video src={m.url} muted />
+                  <span className="pd-gallery__videothumb" aria-label="Video">▶</span>
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.url} alt="" />
+                  <SmartImg src={m.url} alt="" widths={[IMG_WIDTHS.tiny]} sizes="96px" loading="lazy" />
                 )}
                 <button type="button" onClick={() => removeMedia(m.tempId)} aria-label="Remove">
                   ×

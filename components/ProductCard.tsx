@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import SmartImg from './SmartImg';
 import type { Product } from '@/lib/types';
 import { isOnSale, getEffectivePrice } from '@/lib/pricing';
+import { IMG_WIDTHS } from '@/lib/imageUrl';
 
 export default function ProductCard({
   product,
@@ -9,7 +11,8 @@ export default function ProductCard({
   product: Product;
   globalDiscountPercent?: number | null;
 }) {
-  const cover = product.media[0];
+  // Prefer a photo for the card: photos are tiny once resized, videos are heavy to load in a grid.
+  const cover = product.media.find((m) => m.type === 'image') ?? product.media[0];
   const isSold = !product.is_available;
   const isOutOfStock = !isSold && product.quantity <= 0;
   const onSale = isOnSale(product, globalDiscountPercent);
@@ -20,10 +23,19 @@ export default function ProductCard({
       <div className="product-card__frame">
         {cover ? (
           cover.type === 'video' ? (
-            <video src={cover.url} muted playsInline preload="metadata" />
+            // Video-only product: don't download the video just to draw a card.
+            <div className="product-card__videotile" aria-label={`${product.name} (video)`}>
+              <span>▶</span>
+              <small>Video</small>
+            </div>
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover.url} alt={product.name} loading="lazy" />
+            <SmartImg
+              src={cover.url}
+              alt={product.name}
+              widths={[IMG_WIDTHS.card, IMG_WIDTHS.cardLarge]}
+              sizes="(max-width: 520px) 50vw, 360px"
+              loading="lazy"
+            />
           )
         ) : (
           <div
