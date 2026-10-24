@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import FloatingContact from '@/components/FloatingContact';
 import Analytics from '@/components/Analytics';
+import SiteNotice from '@/components/SiteNotice';
 import { CartProvider } from '@/context/CartContext';
 import './globals.css';
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Suspense fallback={null}>
             <Analytics />
           </Suspense>
+          <SiteNotice />
           {children}
           <FloatingContact />
         </CartProvider>

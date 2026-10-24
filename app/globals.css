@@ -1418,3 +1418,21 @@ button {
   text-transform: uppercase;
   opacity: 0.8;
 }
+
+/* ---------- Temporary site-wide notice (components/SiteNotice.tsx) ---------- */
+
+.site-notice {
+  background: #2a1d14;
+  color: var(--ivory);
+  text-align: center;
+  padding: 11px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.site-notice a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+}
