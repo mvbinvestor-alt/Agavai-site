@@ -40,6 +40,12 @@ export default function PrivacyPage() {
           This does not include your name, IP address in readable form, or any way to personally
           identify you from browsing alone.
         </p>
+        <p>
+          For the security of the site, if a visitor&apos;s activity looks automated or abusive
+          (for example, downloading hundreds of photos in a few minutes), we may keep that
+          visitor&apos;s IP address and browser type for up to 30 days to investigate. We do this
+          only for such unusual activity, never for ordinary visits.
+        </p>
 
         <h2>How We Use Your Information</h2>
         <ul>
